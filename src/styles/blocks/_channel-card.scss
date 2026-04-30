@@ -1,0 +1,65 @@
+@use "../helpers" as *;
+
+.channel-card {
+  display: flex;
+  flex-direction: column;
+  padding-inline: var(--gap-small);
+
+  &.isActive {
+    background-color: var(--background-color-accent);
+  }
+
+  &__container {
+    padding-block: var(--gap-small);
+  }
+
+  &__link {
+    display: contents;
+  }
+
+  &__header,
+  &__body {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__user {
+    font-weight: 600;
+  }
+
+  &__date {
+    font-size: rem(14);
+    opacity: 0.5;
+  }
+
+  &__last-message {
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background-image: linear-gradient(
+      to right,
+      var(--color-light) 80%,
+      var(--background-color-secondary)
+    );
+    background-clip: text;
+    color: transparent;
+    opacity: 0.5;
+  }
+
+  &__new-messages {
+    --inner-bg-color: var(--background-color-accent);
+    @include flex-center();
+
+    flex-shrink: 0;
+
+    margin-left: rem(8);
+    border-radius: rem(20);
+
+    &-count {
+      font-size: rem(12);
+      padding: rem(1) rem(7);
+    }
+  }
+}

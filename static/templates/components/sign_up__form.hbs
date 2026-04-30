@@ -1,0 +1,90 @@
+<div class="sign-up">
+  <form action="" class="sign-up__form form">
+    <h1 class="h1">Регистрация</h1>
+    <div class="form__fields">
+      <input
+        type="email"
+        class="sign-up__form-email"
+        name="email"
+        placeholder="Почта"
+        value="{{ email }}"
+        autocomplete="email"
+        data-js-email
+      />
+      {{> form_error error_message=registerEmailError}}
+      <input
+        type="text"
+        class="sign-up__form-login"
+        name="login"
+        placeholder="Логин"
+        value="{{ login }}"
+        autocomplete="username"
+        data-js-login
+      />
+      {{> form_error error_message=registerLoginError}}
+      <input
+        type="text"
+        class="sign-up__form-name"
+        name="name"
+        placeholder="Имя"
+        value="{{ name }}"
+        autocomplete="name"
+        data-js-name
+      />
+      {{> form_error error_message=registerNameError}}
+      <input
+        type="text"
+        class="sign-up__form-surname"
+        name="surname"
+        placeholder="Фамилия"
+        value="{{ surname }}"
+        autocomplete="surname"
+        data-js-surname
+      />
+      {{> form_error error_message=registerSurnameError}}
+      <input
+        type="tel"
+        class="sign-up__form-phone"
+        name="phone"
+        placeholder="Номер телефона"
+        value="{{ phone }}"
+        autocomplete="tel"
+        data-js-phone
+      />
+      {{> form_error error_message=registerPhoneError}}
+      <input
+        type="password"
+        class="sign-up__form-password"
+        name="password"
+        placeholder="Пароль"
+        value="{{ password }}"
+        autocomplete="new-password"
+        data-js-password
+      />
+      {{> form_error error_message=registerPasswordError}}
+      <input
+        type="password"
+        class="sign-up__form-confirm-password"
+        name="password-confirm"
+        placeholder="Повторите пароль"
+        value="{{ passwordConfirm }}"
+        autocomplete="new-password"
+        data-js-password-confirm
+      />
+      {{> form_error error_message=registerPasswordConfirmError}}
+    </div>
+    <div class="form__route">
+      <button
+        type="button"
+        class="button-primary colored-border"
+        {{
+        button_disabled
+        }}
+        data-js-submit-button
+      >
+        Зарегистрироваться
+      </button>
+      <a class="colored-link" href="/login">Войти</a>
+    </div>
+  </form>
+</div>

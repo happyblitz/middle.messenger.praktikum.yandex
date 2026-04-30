@@ -1,0 +1,33 @@
+<nav class="channels" data-js-channels>
+  <ul class="channels__list">
+    {{#each channels}}
+    <li class="channels__item">
+      <div class="channel-card {{#if isActive}}isActive{{/if}}">
+        <a
+          href="{{link}}"
+          data-channel-id="{{id}}"
+          class="channel-card__link"
+          data-js-channel-card-link
+        >
+          <div class="channel-card__container">
+            <div class="channel-card__header">
+              <div class="channel-card__user">{{username}}</div>
+              <div class="channel-card__date">{{date}}</div>
+            </div>
+            <div class="channel-card__body">
+              <div class="channel-card__last-message">{{last_message}}</div>
+              {{#if new_messages}}
+              <div class="channel-card__new-messages colored-border">
+                <span class="channel-card__new-messages-count"
+                  >{{new_messages}}</span
+                >
+              </div>
+              {{/if}}
+            </div>
+          </div>
+        </a>
+      </div>
+    </li>
+    {{/each}}
+  </ul>
+</nav>

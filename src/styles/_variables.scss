@@ -1,0 +1,31 @@
+@use "helpers" as *;
+
+:root {
+  --messenger-max-width: #{rem(1440)};
+
+  --background-color-primary: rgb(20, 20, 20);
+  --background-color-secondary: rgb(27, 27, 30);
+  --background-color-accent: #4d434f;
+  --background-color-active-forms: #393939;
+
+  --color-light: #fff;
+  --color-warning: #ff8ba3;
+  --color-accent: #dd7fff;
+  --color-accent-hover: #e040fb;
+  --color-shadow: rgba(255, 255, 255, 0.15);
+  --color-accent2: #0c7909;
+
+  --border: #{rem(1)} solid var(--color-light);
+  --border-radius: #{rem(8)};
+
+  --gap-small: #{rem(8)};
+  --gap-medium: #{rem(12)};
+  --gap: calc(#{rem(8)} * 2);
+
+  --transition-duration: 0.2s;
+
+  --opacity: 0.5;
+
+  --icon-block-width: #{rem(32)};
+  --icon-block-width-big: #{rem(40)};
+}

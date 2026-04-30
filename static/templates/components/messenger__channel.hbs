@@ -1,0 +1,118 @@
+<div class="channel">
+  {{#if activeChannel}}
+  <header class="channel__header static-header">
+    <div class="channel__header-username">{{activeChannel.username}}</div>
+    <div class="channel__header-info">
+      <div class="channel__header-info-control">
+        <div class="channel__header-info-control-inner">
+          <h2>Управление чатом</h2>
+          <button type="button" data-js-adduser-show-modal>
+            Пригласить в чат
+          </button>
+          <button type="button" data-js-removeuser-show-modal>
+            Удалить из чата
+          </button>
+        </div>
+      </div>
+      <button
+        type="button"
+        class="channel__header-info-settings"
+        aria-label="настройки чата"
+        title="настройки чата"
+        data-js-channel-settings
+      >
+        ...
+      </button>
+    </div>
+  </header>
+  <div class="channel__window">
+    <div class="channel__window-wrapper" data-js-channel-messages>
+      {{> messages}}
+    </div>
+  </div>
+  <footer class="channel__footer">
+    <div
+      class="channel__footer-attached visually-hidden"
+      js-data-channel-attached
+    >
+      <span
+        class="channel__footer-attached-filename"
+        js-data-channel-attached-filename
+      ></span>
+      <button
+        type="button"
+        class="channel__footer-attached-cancel icon"
+        js-data-channel-attached-cancel
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+        >
+          <path
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-miterlimit="10"
+            stroke-width="1.5"
+            d="m7.757 16.243l8.486-8.486m0 8.486L7.757 7.757"
+          />
+        </svg>
+      </button>
+    </div>
+    <form action="" class="channel__footer-form">
+      <input
+        type="file"
+        name="channel-attach"
+        class="channel__footer-form-attach"
+        id="channel-attach"
+        accept="image/*"
+        js-data-channel-form-attach
+      />
+      <label for="channel-attach">
+        <div class="channel__footer-form-attach-icon icon">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 16 16"
+          >
+            <path
+              fill="currentColor"
+              d="M2.283 7.975a.5.5 0 0 0 .854.354l4.595-4.597a2.5 2.5 0 1 1 3.536 3.536l-5.303 5.304a1 1 0 0 1-1.414-1.414l5.303-5.304a.5.5 0 0 0-.708-.708l-5.303 5.305a2 2 0 1 0 2.828 2.828l5.303-5.304a3.5 3.5 0 1 0-4.95-4.95L2.43 7.621a.5.5 0 0 0-.146.354"
+            />
+          </svg></div
+      ></label>
+      <textarea
+        name="channel-input"
+        class="channel__footer-form-input"
+        placeholder="Ваше сообщение"
+        data-js-channel-input
+      ></textarea>
+      <button
+        class="channel__footer-form-send visually-hidden"
+        type="button"
+        data-js-channel-input-send
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 20 20"
+        >
+          <path
+            fill="currentColor"
+            d="M2.724 2.053a.5.5 0 0 0-.707.576l1.498 5.618a.5.5 0 0 0 .4.364l6.855 1.142c.279.047.279.447 0 .494l-6.854 1.142a.5.5 0 0 0-.401.364l-1.498 5.618a.5.5 0 0 0 .707.576l15-7.5a.5.5 0 0 0 0-.894z"
+          />
+        </svg>
+      </button>
+    </form>
+  </footer>
+  {{else}}
+  <div class="channel__no-active">
+    <p>Выберите чат, чтобы начать общаться</p>
+  </div>
+  {{/if}}
+</div>

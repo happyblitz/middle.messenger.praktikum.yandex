@@ -1,0 +1,60 @@
+@use "../helpers" as *;
+
+.messenger {
+  max-width: var(--messenger-max-width);
+  width: 100%;
+  margin-inline: auto;
+  height: 100%;
+
+  &__inner {
+    display: grid;
+    height: 100%;
+    grid-template-columns: fluid(300, 270) 1fr;
+  }
+
+  &__aside {
+    box-shadow: inset 0 0 0 1px var(--color-shadow);
+  }
+
+  &__main {
+    display: flex;
+    min-height: 0;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: var(--gap-small);
+    padding-inline: var(--gap-small);
+
+    &-search {
+      width: 100%;
+    }
+  }
+
+  &__channels {
+    margin-top: var(--gap);
+  }
+
+  &__burger-button {
+    @include square(var(--icon-block-width));
+    @include flex-center();
+
+    color: var(--color-light);
+    opacity: var(--opacity);
+    margin-right: var(--gap-small);
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  &__contacts {
+    padding-top: var(--gap);
+  }
+
+  &__contacts-item {
+    padding-block: var(--gap-small);
+  }
+}

@@ -1,0 +1,11 @@
+{{#each messages}}
+<div class="channel__message">
+  <div class="channel__message-username">{{username}}</div>
+  <div class="channel__message-message">{{message}}</div>
+  {{#if image}}
+  <div class="channel__message-image">
+    <img src="{{image}}" alt="" />
+  </div>
+  {{/if}}
+</div>
+{{/each}}

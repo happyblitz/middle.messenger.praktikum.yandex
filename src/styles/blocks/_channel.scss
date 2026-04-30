@@ -1,0 +1,202 @@
+@use "../helpers" as *;
+
+.channel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+  padding-bottom: rem(2);
+  background-color: var(--background-color-secondary);
+  box-shadow:
+    inset -1px 0 0 0 var(--color-shadow),
+    inset 0 1px 0 0 var(--color-shadow),
+    inset 0 -1px 0 0 var(--color-shadow);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: var(--gap-small);
+    padding-inline: var(--gap);
+    box-shadow: 0 1px 0 0 var(--color-shadow);
+
+    &-username {
+      opacity: var(--opacity);
+    }
+
+    &-info {
+      position: relative;
+      display: flex;
+
+      &-settings {
+        @include square(var(--icon-block-width));
+        @include flex-center();
+        transform: rotate(90deg);
+        opacity: var(--opacity);
+      }
+
+      &-control {
+        position: relative;
+        @include hide;
+      }
+
+      &-control-inner {
+        position: absolute;
+        white-space: nowrap;
+        width: max-content;
+        right: 0;
+        top: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--gap-small);
+        background-color: var(--background-color-active-forms);
+        border-radius: var(--border-radius);
+        padding: rem(12) rem(16);
+        z-index: 1000;
+
+        h2 {
+          box-shadow: inset 0 -1px 0 0 var(--color-shadow);
+          opacity: var(--opacity);
+          margin: 0;
+        }
+
+        button:hover {
+          text-decoration: underline;
+        }
+      }
+
+      &:hover {
+        .channel__header-info-control {
+          @include show;
+        }
+      }
+
+      .channel__header-info-modal {
+        & > * {
+          display: flex;
+          flex-direction: column;
+        }
+      }
+    }
+  }
+
+  &__window {
+    flex-grow: 1;
+    display: flex;
+    align-items: safe flex-end;
+    min-height: 0;
+    padding-inline: var(--gap);
+    padding-top: var(--gap);
+    margin-bottom: var(--gap);
+    overflow-x: auto;
+    scrollbar-width: none; // For Firefox
+    &::-webkit-scrollbar {
+      display: none; // For Chrome, Safari, and Edge
+    }
+
+    &-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: rem(14);
+      min-height: 0;
+      overflow-y: auto;
+    }
+  }
+
+  &__footer {
+    flex-shrink: 0;
+    box-shadow: 0 -1px 0 0 var(--color-shadow);
+    padding-right: rem(1); // right-shadow fix
+
+    &-attached {
+      display: flex;
+      align-items: center;
+      padding-inline: var(--gap);
+
+      &-filename {
+        font-style: italic;
+      }
+
+      &-cancel {
+        @include square(var(--icon-block-width));
+        @include flex-center();
+      }
+    }
+
+    .channel__footer-form {
+      position: relative;
+
+      &-attach {
+        @include visually-hidden;
+
+        &-icon {
+          @include square(var(--icon-block-width-big));
+          @include flex-center();
+
+          position: absolute;
+          top: 50%;
+          translate: 0 -50%;
+        }
+      }
+
+      &-input {
+        display: block;
+        width: 100%;
+        height: 100%;
+        background: var(--background-color-primary);
+        word-break: break-all;
+        field-sizing: content;
+        min-height: rem(35);
+        max-height: rem(100);
+        padding: rem(6) var(--gap);
+        padding-inline: rem(55);
+        resize: none;
+        border: none;
+        outline: none;
+        overflow-y: auto;
+        scrollbar-width: none; // For Firefox
+        &::-webkit-scrollbar {
+          display: none; // For Chrome, Safari, and Edge
+        }
+      }
+
+      &-send {
+        @include square(var(--icon-block-width-big));
+        @include flex-center();
+
+        position: absolute;
+        right: rem(10);
+        top: 50%;
+        translate: 0 -50%;
+      }
+    }
+  }
+
+  &__no-active {
+    @include flex-center();
+    flex-grow: 1;
+
+    opacity: 0.4;
+  }
+
+  &__message {
+    display: flex;
+    flex-direction: column;
+    gap: rem(2);
+
+    &-username {
+      font-style: italic;
+      opacity: 0.7;
+    }
+
+    &-message {
+      white-space: pre-wrap; /* Сохраняет переносы и переносит длинные строки */
+      word-break: break-word; /* Дополнительная страховка от распирания */
+    }
+
+    &-image {
+      max-width: rem(350);
+    }
+  }
+}
