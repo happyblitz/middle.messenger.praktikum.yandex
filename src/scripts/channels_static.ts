@@ -4,6 +4,7 @@ interface Ichannel {
   new_messages: number;
   last_message: string;
   timestamp: string;
+  avatar?: string;
 }
 
 const channels: Ichannel[] = [
@@ -13,6 +14,7 @@ const channels: Ichannel[] = [
     new_messages: 0,
     last_message: "Привет, уже заценил новый дизайн сайта?",
     timestamp: "2026-05-20T10:15:00Z",
+    avatar: "/static/avatars/1.svg",
   },
   {
     id: 2,
@@ -20,6 +22,7 @@ const channels: Ichannel[] = [
     new_messages: 100,
     last_message: "Это та, о ком я подумала?",
     timestamp: "2026-05-20T09:42:12Z",
+    avatar: "/static/avatars/2.svg",
   },
   {
     id: 3,
@@ -27,6 +30,7 @@ const channels: Ichannel[] = [
     new_messages: 1,
     last_message: "Я обновил прод, все, кажется, на месте и работает!",
     timestamp: "2026-05-19T22:10:05Z",
+    avatar: "/static/avatars/3.svg",
   },
   {
     id: 4,
@@ -48,6 +52,7 @@ const channels: Ichannel[] = [
     new_messages: 1,
     last_message: "Не забудь отправить мне всю документацию к концу дня",
     timestamp: "2026-05-19T12:05:30Z",
+    avatar: "/static/avatars/6.svg",
   },
   {
     id: 7,
@@ -55,6 +60,7 @@ const channels: Ichannel[] = [
     new_messages: 2,
     last_message: "Сервер точно упадет с такой нагрузкой..",
     timestamp: "2026-05-18T16:45:10Z",
+    avatar: "/static/avatars/7.svg",
   },
   {
     id: 8,
@@ -76,7 +82,13 @@ const channels: Ichannel[] = [
     new_messages: 0,
     last_message: "На выходных семейный сбор, будь готов",
     timestamp: "2026-05-17T09:00:00Z",
+    avatar: "/static/avatars/10.svg",
   },
 ];
 
-export default channels;
+const updChannels = channels.map((el) => ({
+  ...el,
+  avatar: el.avatar ?? "/static/avatars/default.svg",
+}));
+
+export default updChannels;

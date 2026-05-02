@@ -6,6 +6,8 @@ body {
   height: 100dvh;
   overflow: hidden;
   background-color: var(--background-color-primary);
+  font-family: var(--font-family-base);
+  font-size: 14px;
 }
 
 body,
@@ -65,7 +67,7 @@ a {
 [disabled],
 :disabled {
   cursor: not-allowed !important;
-  opacity: 0.5;
+  opacity: var(--opacity);
   filter: grayscale(1);
   pointer-events: none;
 }

@@ -1,10 +1,12 @@
 @use "normalize";
+@use "fonts";
 @use "variables";
 @use "globals";
 @use "utils";
 
 @use "./blocks/_error-message";
 @use "./blocks/_form";
+@use "./blocks/_avatar";
 @use "./blocks/_messenger";
 @use "./blocks/_channel";
 @use "./blocks/_channel-card";

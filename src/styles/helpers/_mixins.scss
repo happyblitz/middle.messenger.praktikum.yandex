@@ -57,3 +57,17 @@
   clip: rect(0 0 0 0) !important;
   overflow: hidden !important;
 }
+
+// Скрытый скролл
+@mixin hidden-scroll($x: true) {
+  @if $x {
+    overflow-x: auto;
+  } @else {
+    overflow-y: auto;
+  }
+
+  scrollbar-width: none; // For Firefox
+  &::-webkit-scrollbar {
+    display: none; // For Chrome, Safari, and Edge
+  }
+}

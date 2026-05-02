@@ -1,11 +1,17 @@
 {{#each messages}}
 <div class="channel__message">
-  <div class="channel__message-username">{{username}}</div>
-  <div class="channel__message-message">{{message}}</div>
-  {{#if image}}
-  <div class="channel__message-image">
-    <img src="{{image}}" alt="" />
+  <img
+    class="channel__message-logo avatar"
+    src="{{avatar}}"
+    alt="Аватар чата"
+  />
+  <div class="channel__message-container">
+    <div class="channel__message-message">{{message}}</div>
+    {{#if image}}
+    <div class="channel__message-image">
+      <img src="{{image}}" alt="" />
+    </div>
+    {{/if}}
   </div>
-  {{/if}}
 </div>
 {{/each}}

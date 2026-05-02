@@ -5,7 +5,7 @@
 
   & > div {
     padding: rem(35) rem(40);
-    background-color: var(--background-color-active-forms);
+    background-color: var(--background-color-forms);
     border-radius: var(--border-radius);
     opacity: 0.95;
   }
@@ -29,6 +29,7 @@
 
   &__button {
     width: 100%;
+    padding: rem(4);
     background-color: var(--color-warning);
   }
 

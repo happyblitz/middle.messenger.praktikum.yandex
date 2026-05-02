@@ -25,4 +25,6 @@ const fields = [
   },
 ];
 
-export default fields;
+const avatar = "/static/avatars/user.svg";
+
+export { fields, avatar };

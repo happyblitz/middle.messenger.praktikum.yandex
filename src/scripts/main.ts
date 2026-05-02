@@ -1,7 +1,10 @@
 import hbsAdapter from "./HbsAdapter.ts";
 import uploadChannels from "./channels_static.ts";
 import messagesChannel_1 from "./channel_1_static.ts";
-import profileFields from "./profile_fields_static.ts";
+import {
+  fields as profileFields,
+  avatar as profileAvatar,
+} from "./profile_fields_static.ts";
 import "../styles/main.scss";
 
 const app = document.querySelector("[data-js-main]");
@@ -288,6 +291,7 @@ const routes: Record<string, () => void> = {
       activeChannel,
       messages,
       profileFields,
+      profileAvatar,
     });
 
     // обработчик окна "Добавить в чат"
@@ -450,6 +454,7 @@ const routes: Record<string, () => void> = {
               message: inputValue,
               username: "user",
               image: attachBasa64,
+              avatar: profileAvatar,
             },
           ];
 

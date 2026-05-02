@@ -9,15 +9,30 @@
     background-color: var(--background-color-accent);
   }
 
-  &__container {
-    padding-block: var(--gap-small);
-  }
-
   &__link {
     display: contents;
   }
 
-  &__header,
+  &__container {
+    padding-block: var(--gap-small);
+    display: flex;
+    gap: var(--gap-small);
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
   &__body {
     display: flex;
     justify-content: space-between;
@@ -25,12 +40,12 @@
   }
 
   &__user {
-    font-weight: 600;
+    font-weight: 500;
   }
 
   &__date {
-    font-size: rem(14);
-    opacity: 0.5;
+    font-size: 0.75em;
+    color: var(--color-gray);
   }
 
   &__last-message {
@@ -38,14 +53,8 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    background-image: linear-gradient(
-      to right,
-      var(--color-light) 80%,
-      var(--background-color-secondary)
-    );
     background-clip: text;
-    color: transparent;
-    opacity: 0.5;
+    opacity: var(--opacity);
   }
 
   &__new-messages {
@@ -58,7 +67,7 @@
     border-radius: rem(20);
 
     &-count {
-      font-size: rem(12);
+      font-size: 0.65em;
       padding: rem(1) rem(7);
     }
   }

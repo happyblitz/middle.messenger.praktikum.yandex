@@ -1,0 +1,7 @@
+.avatar {
+  flex-shrink: 0;
+  width: var(--avatar-width);
+  height: var(--avatar-width);
+  border-radius: 100%;
+  object-fit: cover;
+}
