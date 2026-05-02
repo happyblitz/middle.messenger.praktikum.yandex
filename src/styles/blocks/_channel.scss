@@ -20,11 +20,25 @@
     padding-inline: var(--gap);
     box-shadow: 0 1px 0 0 var(--color-shadow);
 
-    &-username {
+    &-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--gap-small);
+    }
+
+    &-back {
+      @include square(--icon-block-width);
+      @include flex-center;
+      @include mobile-above {
+        display: none;
+      }
+    }
+
+    &-title {
       opacity: var(--opacity);
     }
 
-    &-info {
+    &-tools {
       position: relative;
       display: flex;
 
@@ -67,12 +81,12 @@
       }
 
       &:hover {
-        .channel__header-info-control {
+        .channel__header-tools-control {
           @include show;
         }
       }
 
-      .channel__header-info-modal {
+      .channel__header-tools-modal {
         & > * {
           display: flex;
           flex-direction: column;

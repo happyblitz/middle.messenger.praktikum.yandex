@@ -294,6 +294,23 @@ const routes: Record<string, () => void> = {
       profileAvatar,
     });
 
+    // обработчки кнопки: открывает список чатов в мобильной версии
+    // закрывает модальные окна
+    const backButtonElement = app.querySelector<HTMLButtonElement>(
+      "[channel-is-not-active]",
+    );
+
+    const messengerElement = app.querySelector<HTMLInputElement>(
+      "[data-js-messenger]",
+    );
+
+    if (backButtonElement && messengerElement) {
+      backButtonElement.addEventListener("click", () => {
+        closeModals();
+        messengerElement.classList.remove("channel-is-active");
+      });
+    }
+
     // обработчик окна "Добавить в чат"
     newEventOpenModal("[data-js-adduser-show-modal]", "[data-js-adduser]");
 

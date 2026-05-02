@@ -10,12 +10,31 @@
     display: grid;
     height: 100%;
     grid-template-columns: fluid(300, 270) 1fr;
+
+    @include mobile {
+      grid-template-columns: 1fr;
+
+      .messenger__main {
+        display: none;
+      }
+
+      &.channel-is-active {
+        .messenger__aside {
+          display: none;
+        }
+
+        .messenger__main {
+          display: flex;
+        }
+      }
+    }
   }
 
   &__aside {
     display: flex;
     flex-direction: column;
     min-height: 0;
+    min-width: 0;
     box-shadow: inset 0 0 0 1px var(--color-shadow);
   }
 
