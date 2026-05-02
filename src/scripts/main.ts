@@ -480,6 +480,7 @@ const routes: Record<string, () => void> = {
             hbsAdapter.compile("new_message", { messages: newMessage }),
           );
 
+          formAttach.value = "";
           inputElement.value = "";
           sendButtonElement.classList.add(cssHideClassName);
 
