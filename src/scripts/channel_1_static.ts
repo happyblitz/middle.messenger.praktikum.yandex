@@ -1,4 +1,11 @@
-const messages = [
+interface Imessage {
+  message: string;
+  username: string;
+  image?: string;
+  avatar: string;
+}
+
+const messages: Imessage[] = [
   {
     message:
       "Я вот подумал заменить обычный бургер на что-то более статусное! ^^",

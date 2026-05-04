@@ -1,3 +1,5 @@
+@use "../helpers" as *;
+
 .avatar {
   flex-shrink: 0;
   width: var(--avatar-width);

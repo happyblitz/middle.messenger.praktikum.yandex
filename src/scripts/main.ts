@@ -263,7 +263,9 @@ const routes: Record<string, () => void> = {
 
     // fake data for channel with id = 1
     if (activeChannelId === 1) {
-      messages = messagesChannel_1;
+      messages = messagesChannel_1.map((m) => {
+        return { ...m, imageDesc: m.image?.split("/").at(-1) ?? "" };
+      });
     }
 
     const channels = uploadChannels.map((channel) => {
@@ -460,9 +462,11 @@ const routes: Record<string, () => void> = {
 
         // проверка наличия аттача
         let attachBasa64;
+        let imageDesc;
         if (formAttach?.files) {
           const attach = formAttach.files[0];
           attachBasa64 = await toBase64(attach);
+          imageDesc = attach.name;
         }
 
         if (inputValue || attachBasa64) {
@@ -471,6 +475,7 @@ const routes: Record<string, () => void> = {
               message: inputValue,
               username: "user",
               image: attachBasa64,
+              imageDesc,
               avatar: profileAvatar,
             },
           ];
