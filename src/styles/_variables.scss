@@ -1,0 +1,39 @@
+@use "helpers" as *;
+
+:root {
+  --messenger-max-width: #{rem(1440)};
+
+  --font-family-base: "Inter", sans-serif;
+  --font-size: #{rem(14)};
+
+  --background-color-primary: rgb(20, 20, 20);
+  --background-color-secondary: rgb(27, 27, 30);
+  --background-color-accent: #4d434f;
+  --background-color-forms: #393939;
+  --background-color-message: #262426;
+
+  --color-light: #fff;
+  --color-warning: #ff8ba3;
+  --color-accent: #dd7fff;
+  --color-accent-hover: #e040fb;
+  --color-accent2: #0c7909;
+  --color-gray: #6b6b6b;
+
+  --color-shadow: rgba(255, 255, 255, 0.15);
+
+  --border: #{rem(1)} solid var(--color-light);
+  --border-radius: #{rem(8)};
+
+  --gap-small: #{rem(8)};
+  --gap-medium: #{rem(12)};
+  --gap: calc(var(--gap-small) * 2);
+
+  --transition-duration: 0.4s;
+
+  --opacity: 0.5;
+
+  --icon-block-width: #{rem(32)};
+  --icon-block-width-big: #{rem(40)};
+
+  --avatar-width: #{rem(50)};
+}

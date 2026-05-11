@@ -1,0 +1,89 @@
+@use "helpers" as *;
+
+.colored-link {
+  color: var(--color-accent);
+  text-decoration: underline;
+
+  @include hover {
+    color: var(--color-accent-hover);
+    text-decoration: underline;
+  }
+}
+
+.colored-border {
+  --inner-bg-color: var(--background-color-secondary);
+
+  color: var(--color-light);
+  border: rem(1) solid transparent;
+  background:
+    linear-gradient(var(--inner-bg-color), var(--inner-bg-color)) padding-box,
+    linear-gradient(35deg, var(--color-accent2) 0%, var(--color-accent) 120%)
+      border-box;
+}
+
+.static-header {
+  height: rem(48);
+}
+
+.visually-hidden {
+  @include visually-hidden;
+}
+
+.absolute-box {
+  @include abs-center;
+  top: 45%;
+
+  @include mobile {
+    width: 100%;
+    padding-inline: var(--gap);
+  }
+}
+
+.centered-box {
+  @include flex-center();
+  flex-grow: 1;
+  margin-bottom: rem(100);
+
+  &__container {
+    width: rem(360);
+    padding: rem(50) rem(40);
+    background-color: var(--background-color-secondary);
+    border-radius: var(--border-radius);
+  }
+}
+
+.fixed-box {
+  position: fixed;
+  inset: 0;
+}
+
+.modal-closed {
+  @include hide;
+  translate: -100%;
+}
+
+.contents {
+  display: contents;
+}
+
+.modal-close {
+  @include square(var(--icon-block-width-big));
+  position: absolute;
+  right: 0;
+  top: 0;
+  opacity: 0.7;
+  z-index: 100;
+
+  @include mobile {
+    right: var(--gap);
+  }
+}
+
+.button-primary {
+  padding-block: var(--gap-small);
+  width: 100%;
+
+  &:hover {
+    --inner-bg-color: var(--background-color-primary);
+  }
+}

@@ -1,0 +1,74 @@
+@use "../helpers" as *;
+
+.channel-card {
+  display: flex;
+  flex-direction: column;
+  padding-inline: var(--gap-small);
+
+  &.isActive {
+    background-color: var(--background-color-accent);
+  }
+
+  &__link {
+    display: contents;
+  }
+
+  &__container {
+    padding-block: var(--gap-small);
+    display: flex;
+    gap: var(--gap-small);
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  &__body {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__user {
+    font-weight: 500;
+  }
+
+  &__date {
+    font-size: 0.75em;
+    color: var(--color-gray);
+  }
+
+  &__last-message {
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background-clip: text;
+    opacity: var(--opacity);
+  }
+
+  &__new-messages {
+    --inner-bg-color: var(--background-color-accent);
+    @include flex-center();
+
+    flex-shrink: 0;
+
+    margin-left: rem(8);
+    border-radius: rem(20);
+
+    &-count {
+      font-size: 0.65em;
+      padding: rem(1) rem(7);
+    }
+  }
+}

@@ -1,0 +1,34 @@
+@use "./functions" as *;
+
+$laptop: 1440.98;
+$mobile: 767.98;
+
+@mixin mobile-above {
+  @media (width >= rem($mobile)) {
+    @content;
+  }
+}
+
+@mixin mobile {
+  @media (width <= rem($mobile)) {
+    @content;
+  }
+}
+
+// Этот SCSS-миксин решает главную проблему мобильной верстки:
+// «залипание» hover-эффектов на тачскринах.
+@mixin hover($hasActiveEffectOnMobile: true) {
+  @media (any-hover: hover) {
+    &:hover {
+      @content;
+    }
+  }
+
+  @if ($hasActiveEffectOnMobile) {
+    @media (any-hover: none) {
+      &:active {
+        @content;
+      }
+    }
+  }
+}

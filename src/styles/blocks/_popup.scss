@@ -1,0 +1,41 @@
+@use "../helpers" as *;
+
+.popup {
+  display: none;
+
+  & > div {
+    padding: rem(35) rem(40);
+    background-color: var(--background-color-forms);
+    border-radius: var(--border-radius);
+    opacity: 0.95;
+  }
+
+  &__title {
+    margin: 0;
+    text-align: center;
+    padding-bottom: rem(24);
+    opacity: 0.7;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: rem(12);
+  }
+
+  &__input {
+    width: 100%;
+  }
+
+  &__button {
+    width: 100%;
+    padding: rem(4);
+    background-color: var(--color-warning);
+  }
+
+  &__adduser {
+    .popup__button {
+      background-color: var(--color-accent2);
+    }
+  }
+}
