@@ -1,0 +1,24 @@
+<div>
+  <div class="profile__header">
+    <form action="" class="edit-logo__form">
+      {{{avatarInput}}}
+      <label for="edit-logo-attach">{{{avatarImg}}}</label>
+    </form>
+  </div>
+  <form class="contents" action="">
+    <div class="profile__data clear-input">
+      {{#each profileFields}}
+      <label class="profile__data-container">
+        <span class="profile__data-term">{{this.label}}</span>
+        <input
+          type="text"
+          name="{{@key}}"
+          value="{{this.value}}"
+          class="profile__data-value"
+        />
+      </label>
+      {{/each}}
+    </div>
+    <div class="profile__controls">{{{saveButton}}}</div>
+  </form>
+</div>

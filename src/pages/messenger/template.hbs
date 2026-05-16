@@ -1,0 +1,21 @@
+<div class="messenger">
+  <div
+    class="messenger__inner {{#if activeChatCard}}channel-is-active{{/if}}"
+    ref="messenger"
+  >
+    <aside class="messenger__aside">
+      <header class="messenger__header static-header">
+        {{{menuButton}}} {{{searchInput}}}
+      </header>
+      <div class="messenger__channels">
+        <nav class="channels">
+          <ul class="channels__list" ref="channelList"></ul>
+        </nav>
+      </div>
+    </aside>
+    <main class="messenger__main">{{{channelWindow}}}</main>
+  </div>
+  <div class="fixed-box modal-closed" ref="profile">{{{profile}}}</div>
+</div>
+
+{{!-- {{{profile__edit}}}{{{profile__password}}} --}}

@@ -1,0 +1,17 @@
+<div>
+  <div class="profile__header">
+    {{{avatarImg}}}
+    <h2 class="h2 profile__username">user</h2>
+  </div>
+  <div class="profile__data">
+    {{#each profileFields}}
+    <dl class="profile__data-container">
+      <dt class="profile__data-term">{{label}}</dt>
+      <dd class="profile__data-value">{{value}}</dd>
+    </dl>
+    {{/each}}
+  </div>
+  <div class="profile__controls">
+    {{{editProfileButton}}}{{{newPasswordButton}}}{{{logoutButton}}}
+  </div>
+</div>

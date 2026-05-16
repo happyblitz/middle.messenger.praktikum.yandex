@@ -1,0 +1,15 @@
+<div class="channel__message">
+  {{{avatar}}}
+  <div class="channel__message-container">
+    <!-- prettier-ignore -->
+    <div
+      class="channel__message-message
+    {{#if error}}message-error{{/if}}"
+    >{{message}}</div>
+    {{#if image}}
+    <div class="channel__message-image">
+      <img src="{{image}}" alt="{{imageDesc}}" />
+    </div>
+    {{/if}}
+  </div>
+</div>
