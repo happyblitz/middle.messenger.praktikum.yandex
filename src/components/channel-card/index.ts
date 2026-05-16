@@ -1,4 +1,4 @@
-import Block from "../../utils/Block";
+import Block from "../../core/Block";
 import Avatar from "../avatar";
 import hbs from "./template.hbs?raw";
 import "./styles.scss";

@@ -1,4 +1,4 @@
-import Block from "../../utils/Block";
+import Block from "../../core/Block";
 import Modal from "../../utils/Modal";
 import { getFilename } from "../../utils/Globals";
 import ChannelAPI from "../../api/ChannelApi";

@@ -1,6 +1,5 @@
-import Block from "../../../utils/Block";
+import Block from "../../../core/Block";
 import Button from "../../button";
-import Input from "../../input-field";
 import Avatar from "../../avatar";
 import type { User } from "../../../api/static-data/profile_fields_static";
 import hbs from "./template.hbs?raw";

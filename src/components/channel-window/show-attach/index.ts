@@ -1,4 +1,4 @@
-import Block from "../../../utils/Block";
+import Block from "../../../core/Block";
 import Button from "../../button";
 import cancelIcon from "../close.svg?raw";
 import hbs from "./template.hbs?raw";

@@ -1,4 +1,4 @@
-import Block from "../../../utils/Block";
+import Block from "../../../core/Block";
 import Button from "../../button";
 import Avatar from "../../avatar";
 import type { User } from "../../../api/static-data/profile_fields_static";

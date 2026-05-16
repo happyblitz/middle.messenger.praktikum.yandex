@@ -1,4 +1,4 @@
-import Block from "../../utils/Block";
+import Block from "../../core/Block";
 import ProfileInfo from "./profile-info";
 import ProfileEditFields from "./profile-edit-fields";
 import ProfileChangePassword from "./profile-change-password";

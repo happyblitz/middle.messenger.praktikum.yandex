@@ -4,7 +4,7 @@ import ErrorPage from "../pages/error";
 import LoginPage from "../pages/login";
 import RegisterPage from "../pages/register";
 import MessengerPage from "../pages/messenger";
-import type { DomElement } from "../utils/Block";
+import type { DomElement } from "../core/Block";
 
 const app = document.querySelector("[data-js-main]");
 

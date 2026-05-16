@@ -1,4 +1,4 @@
-import Block from "../../utils/Block";
+import Block from "../../core/Block";
 import Input from "../../components/input-field";
 import Button from "../../components/button";
 import ChannelCard from "../../components/channel-card";

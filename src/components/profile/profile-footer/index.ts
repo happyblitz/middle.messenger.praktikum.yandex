@@ -1,4 +1,4 @@
-import Block from "../../../utils/Block";
+import Block from "../../../core/Block";
 import Button from "../../button";
 import { fixedModalClass } from "../../../utils/Globals";
 import { cssModalClosedClass } from "../../../utils/Globals";
