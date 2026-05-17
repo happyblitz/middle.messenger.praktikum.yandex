@@ -158,6 +158,10 @@ abstract class Block<Props extends Object> {
   public getRef(name: string) {
     return this.refs[name];
   }
+
+  public forceUnmounComponent() {
+    this.unmountComponent();
+  }
 }
 
 export default Block;
