@@ -29,6 +29,7 @@
     &-back {
       @include square(--icon-block-width);
       @include flex-center;
+
       @include mobile-above {
         display: none;
       }
@@ -44,13 +45,15 @@
 
       &-settings {
         @include square(var(--icon-block-width));
-        @include flex-center();
+        @include flex-center;
+
         transform: rotate(90deg);
         opacity: var(--opacity);
       }
 
       &-control {
         position: relative;
+
         @include hide;
       }
 
@@ -130,7 +133,7 @@
 
       &-cancel {
         @include square(var(--icon-block-width));
-        @include flex-center();
+        @include flex-center;
       }
     }
 
@@ -142,7 +145,7 @@
 
         &-icon {
           @include square(var(--icon-block-width-big));
-          @include flex-center();
+          @include flex-center;
 
           position: absolute;
           top: 50%;
@@ -170,7 +173,7 @@
 
       &-send {
         @include square(var(--icon-block-width-big));
-        @include flex-center();
+        @include flex-center;
 
         position: absolute;
         right: rem(10);
@@ -181,9 +184,9 @@
   }
 
   &__no-active {
-    @include flex-center();
-    flex-grow: 1;
+    @include flex-center;
 
+    flex-grow: 1;
     opacity: 0.4;
   }
 
@@ -200,7 +203,7 @@
 
     &-message {
       white-space: pre-wrap; /* Сохраняет переносы и переносит длинные строки */
-      word-break: break-word; /* Дополнительная страховка от распирания */
+      overflow-wrap: break-word; /* Дополнительная страховка от распирания */
     }
 
     &-image {

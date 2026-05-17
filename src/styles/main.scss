@@ -3,6 +3,5 @@
 @use "variables";
 @use "globals";
 @use "utils";
-
-@use "./blocks/_form";
-@use "./blocks/_popup";
+@use "./blocks/form";
+@use "./blocks/popup";

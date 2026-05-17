@@ -4,7 +4,7 @@ import Button from "../../components/button";
 import InputError from "../../components/input-error";
 import hbs from "./template.hbs?raw";
 
-class LoginPage extends Block<{}> {
+class LoginPage extends Block<object> {
   template = hbs;
 
   constructor() {
@@ -52,8 +52,8 @@ class LoginPage extends Block<{}> {
         ) as HTMLButtonElement;
 
         if (event.target === loginField || event.target === passwordField) {
-          const disabled = !Boolean(
-            loginField.value.trim() && passwordField.value.trim(),
+          const disabled = !(
+            loginField.value.trim() && passwordField.value.trim()
           );
 
           submitButton.disabled = disabled;

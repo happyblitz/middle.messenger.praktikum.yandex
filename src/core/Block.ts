@@ -6,7 +6,7 @@ type EventListType = Partial<
   Record<keyof HTMLElementEventMap, (e: Event) => void>
 >;
 
-abstract class Block<Props extends Object> {
+abstract class Block<Props extends object> {
   static componentName: string = "block";
   /** Шаблонная строка */
   protected abstract template: string;
@@ -33,8 +33,8 @@ abstract class Block<Props extends Object> {
     this.beforeCompile();
 
     // создаем заглушки для всех детей
-    const context: Record<string, any> = { ...this.props };
-    for (let childId in this.children) {
+    const context = { ...this.props } as Record<string, unknown>;
+    for (const childId in this.children) {
       context[childId] = `<div data-id="${childId}"></div>`;
     }
 
@@ -59,7 +59,7 @@ abstract class Block<Props extends Object> {
     const firstChild = fragment.firstElementChild as HTMLElement | null;
 
     if (firstChild) {
-      for (let [childId, child] of Object.entries(this.children)) {
+      for (const [childId, child] of Object.entries(this.children)) {
         Array.from(firstChild.querySelectorAll(`[data-id=${childId}]`)).forEach(
           (element) => {
             const childElement = child.element();
@@ -98,9 +98,7 @@ abstract class Block<Props extends Object> {
   /** Метод для общей mount-логики и вызова componentDidMount */
   private mountComponent() {
     /** Вызываем монтирование дочерних элементов */
-    Object.entries(this.children).forEach(([_, child]) =>
-      child.mountComponent(),
-    );
+    Object.values(this.children).forEach((child) => child.mountComponent());
     this.attachListeners();
     this.componentDidMount();
   }
@@ -112,9 +110,9 @@ abstract class Block<Props extends Object> {
   private unmountComponent() {
     if (this.domElement) {
       /** Вызываем очистку в порядке, обратном созданию */
-      Object.entries(this.children)
+      Object.values(this.children)
         .reverse()
-        .forEach(([_, child]) => child.unmountComponent());
+        .forEach((child) => child.unmountComponent());
       this.componentWillUnmount();
       this.removeListeners();
     }

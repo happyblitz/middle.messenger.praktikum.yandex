@@ -3,7 +3,7 @@ import type { RouteConfig } from "../scripts/route.settings";
 
 class Router {
   protected routes;
-  protected currentBlock: Block<{}> | null = null;
+  protected currentBlock: Block<object> | null = null;
   protected app: Element;
 
   constructor(routes: Record<string, RouteConfig>) {

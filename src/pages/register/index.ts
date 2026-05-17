@@ -3,7 +3,7 @@ import Input from "../../components/input-field";
 import Button from "../../components/button";
 import hbs from "./template.hbs?raw";
 
-class RegisterPage extends Block<{}> {
+class RegisterPage extends Block<object> {
   template = hbs;
 
   constructor() {

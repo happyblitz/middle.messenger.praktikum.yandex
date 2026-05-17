@@ -57,12 +57,13 @@
 
   &__channels {
     @include hidden-scroll;
+
     margin-top: var(--gap);
   }
 
   &__burger-button {
     @include square(var(--icon-block-width));
-    @include flex-center();
+    @include flex-center;
 
     color: var(--color-light);
     opacity: var(--opacity);

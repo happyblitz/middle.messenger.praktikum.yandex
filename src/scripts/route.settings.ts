@@ -10,8 +10,8 @@ import MessengerPage from "../pages/messenger";
 // каждый экземпляр блока принимает пропсы своего вида,
 // этот вид нам неважен, мы просто прокинем их в класс блока
 export type RouteConfig = {
-  blockClass: new (props?: Record<string, any>) => Block<any>;
-  props?: Record<string, any>;
+  blockClass: new (props?: Record<string, unknown>) => Block<object>;
+  props?: Record<string, unknown>;
 };
 
 const ROUTES: Record<string, RouteConfig> = {

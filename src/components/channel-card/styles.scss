@@ -56,10 +56,10 @@
 
   &__new-messages {
     --inner-bg-color: var(--background-color-accent);
-    @include flex-center();
+
+    @include flex-center;
 
     flex-shrink: 0;
-
     margin-left: rem(8);
     border-radius: rem(20);
 

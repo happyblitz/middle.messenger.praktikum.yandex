@@ -31,6 +31,7 @@
 
 .absolute-box {
   @include abs-center;
+
   top: 45%;
 
   @include mobile {
@@ -40,7 +41,8 @@
 }
 
 .centered-box {
-  @include flex-center();
+  @include flex-center;
+
   flex-grow: 1;
   margin-bottom: rem(100);
 
@@ -59,6 +61,7 @@
 
 .modal-closed {
   @include hide;
+
   translate: -100%;
 }
 
@@ -68,6 +71,7 @@
 
 .modal-close {
   @include square(var(--icon-block-width-big));
+
   position: absolute;
   right: 0;
   top: 0;
