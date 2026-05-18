@@ -1,31 +1,11 @@
-<div>
-  <div class="profile__header">{{{avatarImg}}}</div>
-  <form class="contents" action="">
+<div class="block-root">
+  <div class="profile__header">
+    {{{avatarImg}}}
+    <h2 class="h2 profile__username">user</h2>
+  </div>
+  <form class="contents" action="" ref="form">
     <div class="profile__data clear-input">
-      <label class="profile__data-container">
-        <span class="profile__data-term">Текущий пароль</span>
-        <input
-          type="password"
-          name="old_password"
-          class="profile__data-value"
-        />
-      </label>
-      <label class="profile__data-container">
-        <span class="profile__data-term">Новый пароль</span>
-        <input
-          type="password"
-          name="new_password"
-          class="profile__data-value"
-        />
-      </label>
-      <label class="profile__data-container">
-        <span class="profile__data-term">Повторите новый пароль</span>
-        <input
-          type="password"
-          name="new_password_confirm"
-          class="profile__data-value"
-        />
-      </label>
+      {{{oldPassInput}}}{{{passwordInput}}}{{{confirmPasswordInput}}}
     </div>
     <div class="profile__controls">{{{saveButton}}}</div>
   </form>

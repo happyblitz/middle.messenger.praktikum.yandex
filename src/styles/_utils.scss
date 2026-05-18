@@ -1,5 +1,9 @@
 @use "helpers" as *;
 
+.block-root {
+  display: contents;
+}
+
 .colored-link {
   color: var(--color-accent);
   text-decoration: underline;

@@ -47,7 +47,6 @@ class MessengerPage extends Block<MessengerProps> {
       type: "search",
       name: "search",
       className: ["messenger__header-search"],
-      withError: false,
     });
 
     const channelWindow = new ChannelWindow({

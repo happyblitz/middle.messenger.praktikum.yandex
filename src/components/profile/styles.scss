@@ -29,7 +29,8 @@
     display: flex;
     flex-direction: column;
     row-gap: var(--gap-medium);
-    min-width: rem(350);
+    min-width: rem(390);
+    width: min-content;
 
     &-container {
       display: flex;

@@ -1,24 +1,13 @@
 <div>
   <div class="profile__header">
-    <form action="" class="edit-logo__form">
+    <form action="" class="edit-logo__form" ref="avatar-form">
       {{{avatarInput}}}
       <label for="edit-logo-attach">{{{avatarImg}}}</label>
     </form>
+    <h2 class="h2 profile__username">user</h2>
   </div>
-  <form class="contents" action="">
-    <div class="profile__data clear-input">
-      {{#each profileFields}}
-      <label class="profile__data-container">
-        <span class="profile__data-term">{{this.label}}</span>
-        <input
-          type="text"
-          name="{{@key}}"
-          value="{{this.value}}"
-          class="profile__data-value"
-        />
-      </label>
-      {{/each}}
-    </div>
+  <form class="contents" action="" ref="form">
+    <div class="profile__data clear-input" ref="profile-fields"></div>
     <div class="profile__controls">{{{saveButton}}}</div>
   </form>
 </div>

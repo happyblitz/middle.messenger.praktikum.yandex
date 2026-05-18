@@ -1,6 +1,9 @@
 import Block from "../../core/Block";
+import type { SyncInputsArgs } from "../../core/Block";
 import Input from "../../components/input-field";
 import Button from "../../components/button";
+import FormValidator from "../../utils/FormValidator";
+import { isEventInForm, isSubmitRelatedTarget } from "../../utils/Dom";
 import hbs from "./template.hbs?raw";
 
 class RegisterPage extends Block<object> {
@@ -52,7 +55,7 @@ class RegisterPage extends Block<object> {
       type: "password",
       name: "password-confirm",
       placeholder: "Пароль",
-      autocomplete: "new-password",
+      autocomplete: "off",
     });
 
     const submitButton = new Button({
@@ -74,24 +77,91 @@ class RegisterPage extends Block<object> {
     };
 
     this.events = {
-      input: () => {
-        const reqFields: HTMLInputElement[] = Object.values(
-          this.children,
-        ).reduce((acc: HTMLInputElement[], element) => {
-          const ref = element.getRef("input") as HTMLInputElement;
-          if (ref) {
-            acc.push(ref);
+      focusout: (event: Event) => {
+        const form = this.getRef("form");
+        if (isEventInForm(event, form)) {
+          const input = event.target as HTMLInputElement;
+
+          // Фокус перешёл на кнопку submit текущей формы
+          // Проверкой займется submit формы
+          if (isSubmitRelatedTarget(event as FocusEvent, form)) {
+            return;
           }
-          return acc;
-        }, []);
 
-        const submitButton = this.children.submitButton.getRef(
-          "button",
-        ) as HTMLButtonElement;
+          this.syncInputsState({ inputName: input.name, strict: false });
+        }
+      },
+      input: (event: Event) => {
+        const form = this.getRef("form");
+        if (isEventInForm(event, form)) {
+          const submitButton = this.children.submitButton.getRef(
+            "button",
+          ) as HTMLButtonElement;
 
-        submitButton.disabled = !reqFields.every((v) => v.value.trim());
+          submitButton.disabled = !this.syncInputsState({ setProps: false });
+        }
+      },
+      submit: (event: Event) => {
+        const form = this.getRef("form");
+        if (isEventInForm(event, form)) {
+          event.preventDefault();
+
+          const formIsValid = this.syncInputsState();
+
+          if (!formIsValid) {
+            return;
+          }
+
+          const form = this.getRef("form") as HTMLFormElement;
+          const formdata = new FormData(form);
+
+          console.log("formdata => ", formdata);
+          formdata.forEach((value, key) => {
+            console.log(`Поле: ${key}, значение ${value}`);
+          });
+        }
       },
     };
+  }
+
+  protected syncInputsState(args: SyncInputsArgs = {}): boolean {
+    const { setProps = true, inputName = "", strict = true } = args;
+
+    // проверка полей, для которых указано regexp
+    let isValid = super.syncInputsState({ setProps, inputName, strict });
+
+    // требуется ли валидация поля password-confirm
+    const shouldValidateConPassInput =
+      !inputName || ["password", "password-confirm"].includes(inputName);
+
+    // проверка поля password-confirm
+    if (shouldValidateConPassInput) {
+      const passInput = this.children.passwordInput.getRef(
+        "input",
+      ) as HTMLInputElement;
+      const conPassInput = this.children.confirmPasswordInput.getRef(
+        "input",
+      ) as HTMLInputElement;
+
+      const errorText = FormValidator.validateConPassField(
+        passInput.value,
+        conPassInput.value,
+        strict,
+      );
+
+      if (errorText) {
+        isValid = false;
+      }
+
+      if (setProps) {
+        this.children.confirmPasswordInput.setProps({
+          errorText,
+          value: conPassInput.value,
+        });
+      }
+    }
+
+    return isValid;
   }
 }
 

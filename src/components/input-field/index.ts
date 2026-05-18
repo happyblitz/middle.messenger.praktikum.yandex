@@ -14,7 +14,8 @@ type InputProps = {
   errorText?: string;
   id?: string;
   accept?: string;
-  withError?: boolean;
+  onFocusout?: ((e: Event) => void) | (() => void);
+  onChange?: ((e: Event) => void) | (() => void);
 };
 
 class Input extends Block<InputProps> {
@@ -23,14 +24,31 @@ class Input extends Block<InputProps> {
   constructor(props: InputProps) {
     super(props);
 
-    const withError = this.props.withError ?? true;
+    this.isInputComponent = true;
 
-    if (withError) {
+    if (this.props.errorText) {
       this.children = {
-        inputError: props.errorText
-          ? new InputError({ text: props.errorText })
-          : new InputError(),
+        inputError: new InputError({ text: this.props.errorText }),
       };
+    }
+
+    this.events = {
+      focusout: this.props.onFocusout,
+      change: this.props.onChange,
+    };
+  }
+
+  protected beforeCompile() {
+    if (this.props.errorText) {
+      if (this.children.inputError) {
+        this.children.inputError.setProps({ text: this.props.errorText });
+      } else {
+        this.children = {
+          inputError: new InputError({ text: this.props.errorText }),
+        };
+      }
+    } else {
+      delete this.children.inputError;
     }
   }
 }

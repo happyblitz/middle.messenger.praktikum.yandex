@@ -2,6 +2,7 @@ import Block from "../../core/Block";
 import Input from "../../components/input-field";
 import Button from "../../components/button";
 import InputError from "../../components/input-error";
+import { isEventInForm } from "../../utils/Dom";
 import hbs from "./template.hbs?raw";
 
 class LoginPage extends Block<object> {
@@ -41,22 +42,33 @@ class LoginPage extends Block<object> {
 
     this.events = {
       input: (event) => {
-        const loginField = this.children.loginInput.getRef(
-          "input",
-        ) as HTMLInputElement;
-        const passwordField = this.children.passwordInput.getRef(
-          "input",
-        ) as HTMLInputElement;
-        const submitButton = this.children.submitButton.getRef(
-          "button",
-        ) as HTMLButtonElement;
+        const form = this.getRef("form");
+        if (isEventInForm(event, form)) {
+          const submitButton = this.children.submitButton.getRef(
+            "button",
+          ) as HTMLButtonElement;
 
-        if (event.target === loginField || event.target === passwordField) {
-          const disabled = !(
-            loginField.value.trim() && passwordField.value.trim()
-          );
+          submitButton.disabled = !this.syncInputsState({ setProps: false });
+        }
+      },
+      submit: (event) => {
+        const form = this.getRef("form");
+        if (isEventInForm(event, form)) {
+          event.preventDefault();
 
-          submitButton.disabled = disabled;
+          const formIsValid = this.syncInputsState();
+
+          if (!formIsValid) {
+            return;
+          }
+
+          const form = this.getRef("form") as HTMLFormElement;
+          const formdata = new FormData(form);
+
+          console.log("formdata => ", formdata);
+          formdata.forEach((value, key) => {
+            console.log(`Поле: ${key}, значение ${value}`);
+          });
         }
       },
     };
