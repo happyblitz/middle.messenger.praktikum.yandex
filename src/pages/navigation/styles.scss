@@ -1,0 +1,9 @@
+@use "../../styles/helpers" as *;
+
+.pages {
+  &__list {
+    display: flex;
+    flex-direction: column;
+    row-gap: var(--gap-small);
+  }
+}

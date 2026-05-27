@@ -1,0 +1,10 @@
+<button
+  type="{{#if type}}{{type}}{{else}}button{{/if}}"
+  {{#if className}}class="{{#each className}}{{this}} {{/each}}"{{/if}}
+  {{#if disabled}}disabled{{/if}}
+  {{#if ariaLabel}}aria-label="{{ariaLabel}}"{{/if}}
+  {{#if title}}title="{{title}}"{{/if}}
+  ref="button"
+>
+  {{{text}}}
+</button>

@@ -1,0 +1,21 @@
+<div class="block-root">
+  {{#if label}}
+    <label {{#if labelClassName}}class="{{#each labelClassName}}{{this}} {{/each}}"{{/if}}>
+    <span>{{label}}</span>
+  {{/if}}
+    <input
+      type="{{#if type}}{{type}}{{else}}text{{/if}}"
+      name="{{name}}"
+      {{#if value}}value="{{ value }}"{{/if}}
+      {{#if id}}id="{{id}}"{{/if}}
+      {{#if accept}}accept="{{accept}}"{{/if}}
+      {{#if autocomplete}}autocomplete="{{autocomplete}}"{{/if}}
+      {{#if placeholder}}placeholder="{{placeholder}}"{{/if}}
+      class="{{#each className}}{{this}} {{/each}} {{#if errorText}}field-error{{/if}}"
+      ref="input"
+    />
+  {{#if label}}
+  </label>
+  {{/if}}
+  {{{inputError}}}
+</div>

@@ -1,7 +1,8 @@
 @use "../helpers" as *;
 
 .form {
-  @include flex-center();
+  @include flex-center;
+
   flex-direction: column;
   gap: rem(34);
 
@@ -14,7 +15,8 @@
   }
 
   &__route {
-    @include flex-center();
+    @include flex-center;
+
     flex-direction: column;
     width: 100%;
     gap: calc(var(--gap-small) * 2);
@@ -22,6 +24,10 @@
     a {
       padding-inline: var(--gap-small);
     }
+  }
+
+  label {
+    width: 100%;
   }
 
   input {
