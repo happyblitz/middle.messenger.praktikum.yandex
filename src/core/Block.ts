@@ -7,12 +7,6 @@ type EventListType = Partial<
   Record<keyof HTMLElementEventMap, (e: Event) => void>
 >;
 
-export type SyncInputsArgs = {
-  setProps?: boolean;
-  inputName?: string;
-  strict?: boolean;
-};
-
 abstract class Block<Props extends object> {
   static componentName: string = "block";
   /** Шаблонная строка */
@@ -27,6 +21,8 @@ abstract class Block<Props extends object> {
   protected refs: Record<string, HTMLElement> = {};
   /** Вложенные компоненты */
   protected children: Record<string, Block<object>> = {};
+  /** Массив ссылок на удаление подписчиков на стор */
+  protected unsubscribers: (() => void)[] = [];
   /** Содержит ли компонент input поле */
   public isInputComponent?: boolean;
 
@@ -125,6 +121,9 @@ abstract class Block<Props extends object> {
       this.componentWillUnmount();
       this.removeListeners();
     }
+
+    // удаляем слушателей стора
+    this.unsubscribers.forEach((u) => u());
   }
 
   /** Метод отрисовки элемента на странице */
@@ -152,54 +151,6 @@ abstract class Block<Props extends object> {
       this.props = { ...this.props, ...props };
       this.render();
     }
-  }
-
-  /**
-   * Валидирует input поля
-   * @param setProps Пересобрать инпут блок или нет
-   * @param inputName Имя валидируемого поля, если пусто, валидируются все поля
-   * @param strict Если true пустое поле = ошибка, иначе пропуск поля
-   */
-  protected syncInputsState({
-    setProps = true,
-    inputName = "",
-    strict = true,
-  }: SyncInputsArgs = {}): boolean {
-    const inputs = Object.values(this.children).filter(
-      (child) =>
-        child.isInputComponent === true &&
-        (inputName === "" ||
-          inputName === (child.getRef("input") as HTMLInputElement).name),
-    );
-
-    let isValid = true;
-
-    for (const inputBlock of inputs) {
-      const input = inputBlock.getRef("input") as HTMLInputElement;
-
-      const errorText = FormValidator.validateInput(
-        input.name,
-        input.value,
-        strict,
-      );
-
-      if (!setProps && errorText) {
-        return false;
-      }
-
-      if (errorText) {
-        isValid = false;
-      }
-
-      if (setProps) {
-        inputBlock.setProps({
-          errorText,
-          value: input.value,
-        });
-      }
-    }
-
-    return isValid;
   }
 
   public element() {

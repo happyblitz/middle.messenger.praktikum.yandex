@@ -1,9 +1,6 @@
 import validateField from "./Validator";
 
 class FormValidator {
-  //formErrors: Record<string, string | null> = {};
-  //formIsValid: boolean = false;
-
   static validateInput(name: string, value: string, strict = true): string {
     const trimValue = value.trim();
 
@@ -28,36 +25,6 @@ class FormValidator {
 
     return "";
   }
-
-  /*
-  public observeFormData(rawData: Record<string, string>) {
-    const data = this.prepareData(rawData);
-    this.validateData(data);
-    this.formIsValid = Object.entries(this.formErrors).every(([, value]) => [
-      value === null,
-    ]);
-    return data;
-  }
-
-  public prepareData(rawData: Record<string, string>) {
-    for (const key in rawData) {
-      if (typeof rawData[key] === "string") {
-        rawData[key] = rawData[key].trim();
-      }
-    }
-
-    return rawData;
-  }
-
-  public validateData(data: Record<string, string>) {
-    this.formErrors = Object.fromEntries(
-      Object.entries(data).map(([fieldName, value]) => [
-        fieldName,
-        validateField(fieldName, value),
-      ]),
-    );
-  }
-  */
 }
 
 export default FormValidator;

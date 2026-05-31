@@ -1,11 +1,11 @@
-import Block from "../../core/Block";
+import FormBlock from "../../core/FormBlock";
 import Input from "../../components/input-field";
 import Button from "../../components/button";
 import InputError from "../../components/input-error";
 import { isEventInForm } from "../../utils/Dom";
 import hbs from "./template.hbs?raw";
 
-class LoginPage extends Block<object> {
+class LoginPage extends FormBlock<object> {
   template = hbs;
 
   constructor() {

@@ -42,6 +42,14 @@ type RequestOptions = {
 
 type HTTPTransportOptions = Omit<RequestOptions, "method">;
 
+export type HTTPRequestRejected = {
+  reason: string;
+  status?: number;
+  response?: string;
+  request?: string;
+  timeout?: number;
+};
+
 class HTTPTransport {
   private baseUrl: string = "";
 
@@ -94,7 +102,7 @@ class HTTPTransport {
 
     return new Promise((resolve, reject) => {
       if (!method) {
-        reject(new Error("HTTP method is required"));
+        reject({ reason: "HTTP method is required" });
         return;
       }
 
@@ -117,29 +125,29 @@ class HTTPTransport {
       });
 
       xhr.onload = function () {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          let response;
+        let response;
 
-          if (xhr.responseType) {
-            response = xhr.response;
-          } else {
-            try {
-              const contentType = xhr.getResponseHeader("Content-Type");
-              if (contentType && contentType.includes("application/json")) {
-                response = JSON.parse(xhr.responseText);
-              } else {
-                response = xhr.responseText;
-              }
-            } catch (e) {
+        if (xhr.responseType) {
+          response = xhr.response;
+        } else {
+          try {
+            const contentType = xhr.getResponseHeader("Content-Type");
+            if (contentType && contentType.includes("application/json")) {
+              response = JSON.parse(xhr.responseText);
+            } else {
               response = xhr.responseText;
             }
+          } catch (e) {
+            response = xhr.responseText;
           }
+        }
 
+        if (xhr.status >= 200 && xhr.status < 300) {
           resolve(response);
         } else {
           reject({
             status: xhr.status,
-            statusText: xhr.statusText,
+            reason: response?.reason ? response.reason : xhr.statusText,
             response: xhr.responseText,
             request: xhr,
           });

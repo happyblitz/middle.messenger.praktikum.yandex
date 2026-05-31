@@ -1,8 +1,8 @@
-import Block from "../../core/Block";
+import FormBlock from "../../core/FormBlock";
 import store from "../../core/Store";
 import AuthController from "../../controllers/AuthController";
 import type Controller from "../../core/Controller";
-import type { SyncInputsArgs } from "../../core/Block";
+import type { SyncInputsArgs } from "../../core/FormBlock";
 import Input from "../../components/input-field";
 import InputError from "../../components/input-error";
 import Button from "../../components/button";
@@ -10,10 +10,9 @@ import FormValidator from "../../utils/validation/FormValidator";
 import { isEventInForm, isSubmitRelatedTarget } from "../../utils/Dom";
 import hbs from "./template.hbs?raw";
 
-class RegisterPage extends Block<object> {
+class RegisterPage extends FormBlock<object> {
   template = hbs;
   controller: Controller | null = null;
-  unsubscribers: (() => void)[] = [];
 
   constructor() {
     super({ sign_in: "/login" });
@@ -222,11 +221,6 @@ class RegisterPage extends Block<object> {
     });
 
     this.unsubscribers.push(unsibscribe);
-  }
-
-  protected componentWillUnmount(): void {
-    // удаляем слушателей стора
-    this.unsubscribers.forEach((u) => u());
   }
 }
 

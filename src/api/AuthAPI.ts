@@ -1,19 +1,22 @@
 import API_SETTINGS from "../scripts/api.settings";
 import HTTPTransport from "../core/HTTPTransport";
+import type { HTTPRequestRejected } from "../core/HTTPTransport";
 
 class AuthApi {
-  private transport: HTTPTransport;
+  private static endpoint = API_SETTINGS.baseUrl + "/auth";
+  private static transport = new HTTPTransport(AuthApi.endpoint);
 
-  constructor() {
-    const endpoint = API_SETTINGS.baseUrl + "/auth";
-    this.transport = new HTTPTransport(endpoint);
-  }
-
-  public singUp(data: Record<string, string>): void {
-    this.transport
-      .post("/signup", { data })
-      .then((response) => console.log(response))
-      .catch((e) => console.log(e));
+  public static async singUp(
+    data: Record<string, string>,
+  ): Promise<Record<string, unknown>> {
+    try {
+      return (await this.transport.post("/signup", { data })) as Record<
+        string,
+        unknown
+      >;
+    } catch (e) {
+      return e as HTTPRequestRejected;
+    }
   }
 }
 

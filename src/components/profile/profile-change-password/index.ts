@@ -1,18 +1,18 @@
-import Block from "../../../core/Block";
+import FormBlock from "../../../core/FormBlock";
 import Button from "../../button";
 import Input from "../../input-field";
 import Avatar from "../../avatar";
 import type { User } from "../../../api/static-data/profile_fields_static";
 import FormValidator from "../../../utils/validation/FormValidator";
 import { isEventInForm, isSubmitRelatedTarget } from "../../../utils/Dom";
-import type { SyncInputsArgs } from "../../../core/Block";
+import type { SyncInputsArgs } from "../../../core/FormBlock";
 import hbs from "./template.hbs?raw";
 
 type ProfileChangePasswordProps = {
   user: User;
 };
 
-class ProfileChangePassword extends Block<ProfileChangePasswordProps> {
+class ProfileChangePassword extends FormBlock<ProfileChangePasswordProps> {
   template = hbs;
 
   constructor(props: ProfileChangePasswordProps) {

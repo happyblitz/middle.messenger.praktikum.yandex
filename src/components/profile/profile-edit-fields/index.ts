@@ -1,4 +1,4 @@
-import Block from "../../../core/Block";
+import FormBlock from "../../../core/FormBlock";
 import Button from "../../button";
 import Input from "../../input-field";
 import Avatar from "../../avatar";
@@ -12,7 +12,7 @@ type ProfileEditFieldsProps = {
   profileFields?: Omit<User, "avatar">;
 };
 
-class ProfileEditFields extends Block<ProfileEditFieldsProps> {
+class ProfileEditFields extends FormBlock<ProfileEditFieldsProps> {
   template = hbs;
 
   constructor(props: ProfileEditFieldsProps) {

@@ -2,9 +2,23 @@ import Controller from "../core/Controller";
 import store from "../core/Store";
 import validateField from "../utils/validation/Validator";
 import FormValidator from "../utils/validation/FormValidator";
+import AuthApi from "../api/AuthAPI";
 
 class AuthController extends Controller {
   public newUser(formData: FormData) {
+    const { data, errors } = this.newUserFormValidate(formData);
+
+    if (Object.keys(errors).length) {
+      // ошибки валидации полей формы отправляем напрямую в стор
+      store.setStateByPath("errors.formRegister.fields", errors);
+      return;
+    }
+
+    //отправляем данные
+    this.newUserRequest(data);
+  }
+
+  protected newUserFormValidate(formData: FormData) {
     // преобразование и валидация данных
     const data: Record<string, string> = {};
     const errors: Record<string, string> = {};
@@ -33,14 +47,24 @@ class AuthController extends Controller {
       }
     }
 
-    if (errors) {
-      // ошибки валидации формы, отправляем напрямую в стор
-      store.setStateByPath("errors.formRegister.fields", errors);
+    return { data, errors };
+  }
+
+  protected async newUserRequest(data: Record<string, string>) {
+    const response = await AuthApi.singUp(data);
+
+    console.log(response);
+
+    // ошибка
+    if (response?.reason) {
+      store.setStateByPath("errors.formRegister.form", response.reason);
       return;
     }
 
-    //@TODO вызвать AuthApi c данными
-    store.setStateByPath("errors.formRegister.form", "Некоторая ошибка");
+    store.setState({
+      isAuthorized: true,
+      user: { id: response.id },
+    });
   }
 }
 
