@@ -1,5 +1,5 @@
 import Handlebars from "handlebars";
-import FormValidator from "../utils/FormValidator";
+import FormValidator from "../utils/validation/FormValidator";
 
 export type DomElement = HTMLElement | null;
 
@@ -28,7 +28,7 @@ abstract class Block<Props extends object> {
   /** Вложенные компоненты */
   protected children: Record<string, Block<object>> = {};
   /** Содержит ли компонент input поле */
-  protected isInputComponent?: boolean;
+  public isInputComponent?: boolean;
 
   constructor(props: Props = {} as Props) {
     this.props = props;

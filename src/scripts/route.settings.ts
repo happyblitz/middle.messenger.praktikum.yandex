@@ -1,3 +1,4 @@
+import store from "../core/Store";
 import Block from "../core/Block";
 import NavigationPage from "../pages/navigation";
 import navLinks from "./navigation.links";
@@ -6,45 +7,82 @@ import LoginPage from "../pages/login";
 import RegisterPage from "../pages/register";
 import MessengerPage from "../pages/messenger";
 
+type RouteRules = {
+  rule: () => boolean; // должно вернуть true, иначе редирект
+  redirect: keyof typeof ROUTES.routes;
+};
+
 // @INFO any
 // каждый экземпляр блока принимает пропсы своего вида,
 // этот вид нам неважен, мы просто прокинем их в класс блока
-export type RouteConfig = {
+type RouteConfig = {
   blockClass: new (props?: Record<string, unknown>) => Block<object>;
   props?: Record<string, unknown>;
+  routeRules?: RouteRules;
 };
 
-const ROUTES: Record<string, RouteConfig> = {
-  "/": {
-    blockClass: NavigationPage,
-    props: {
-      links: navLinks,
+export type RoutesConfig = {
+  afterLogInRedirect: string;
+  afterLogOutRedirect: string;
+  routes: Record<string, RouteConfig>;
+};
+
+export const afterLogInRedirect = "/messenger";
+export const afterLogOutRedirect = "/login";
+
+const ROUTES: RoutesConfig = {
+  afterLogInRedirect,
+  afterLogOutRedirect,
+  routes: {
+    "/": {
+      blockClass: NavigationPage,
+      props: {
+        links: navLinks,
+      },
+    },
+    "/login": {
+      blockClass: LoginPage,
+      routeRules: {
+        rule: () => !store.isAuthorized(),
+        redirect: afterLogInRedirect,
+      },
+    },
+    "/register": {
+      blockClass: RegisterPage,
+      routeRules: {
+        rule: () => !store.isAuthorized(),
+        redirect: afterLogInRedirect,
+      },
+    },
+    "/403": {
+      blockClass: ErrorPage,
+      props: {
+        code: 403,
+        code_message: "Доступ запрещен",
+      },
+    },
+    "/404": {
+      blockClass: ErrorPage,
+      props: {
+        code: 404,
+        code_message: "Страница не найдена",
+      },
+    },
+    "/500": {
+      blockClass: ErrorPage,
+      props: {
+        code: 500,
+        code_message: "Внутрення ошибка сервера",
+      },
+    },
+    "/messenger": {
+      blockClass: MessengerPage,
+      routeRules: {
+        rule: () => store.isAuthorized(),
+        redirect: afterLogOutRedirect,
+      },
     },
   },
-  "/login": { blockClass: LoginPage },
-  "/register": { blockClass: RegisterPage },
-  "/403": {
-    blockClass: ErrorPage,
-    props: {
-      code: 403,
-      code_message: "Доступ запрещен",
-    },
-  },
-  "/404": {
-    blockClass: ErrorPage,
-    props: {
-      code: 404,
-      code_message: "Страница не найдена",
-    },
-  },
-  "/500": {
-    blockClass: ErrorPage,
-    props: {
-      code: 500,
-      code_message: "Внутрення ошибка сервера",
-    },
-  },
-  "/messenger": { blockClass: MessengerPage },
 } as const;
 
 export default ROUTES;

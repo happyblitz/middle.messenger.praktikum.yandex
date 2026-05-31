@@ -18,6 +18,7 @@ export const toBase64 = (file: File): Promise<string> => {
   });
 };
 
+// получить название файла
 export const getFilename = (path: string): string => {
   return path.split("/").at(-1) ?? "";
 };

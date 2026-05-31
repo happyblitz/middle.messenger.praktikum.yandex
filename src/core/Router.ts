@@ -1,18 +1,33 @@
 import Block from "./Block";
-import type { RouteConfig } from "../scripts/route.settings";
+import store from "./Store";
+import type { RoutesConfig } from "../scripts/route.settings";
 
 class Router {
+  private static __instance: Router;
   protected routes;
   protected currentBlock: Block<object> | null = null;
   protected app: Element;
 
-  constructor(routes: Record<string, RouteConfig>) {
+  private constructor(routesConfig: RoutesConfig) {
     this.app = document.querySelector("[data-js-main]") as HTMLElement;
     if (!this.app) {
       throw new Error("attrubute [data-js-main] not found");
     }
 
-    this.routes = routes;
+    this.routes = routesConfig.routes;
+
+    if (routesConfig.afterLogInRedirect && routesConfig.afterLogOutRedirect) {
+      store.subscribe({
+        action: (state) => {
+          state.isAuthorized
+            ? this.goto(routesConfig.afterLogInRedirect)
+            : this.goto(routesConfig.afterLogOutRedirect);
+        },
+        observer: (state) => {
+          return state.isAuthorized;
+        },
+      });
+    }
 
     window.addEventListener("popstate", () => {
       this.goto(window.location.pathname);
@@ -30,6 +45,14 @@ class Router {
     });
   }
 
+  public static getInstance(routesConfig: RoutesConfig): Router {
+    if (!Router.__instance) {
+      Router.__instance = new Router(routesConfig);
+    }
+
+    return Router.__instance;
+  }
+
   public goto(path: string) {
     window.history.pushState({}, "", path);
 
@@ -39,6 +62,11 @@ class Router {
       this.routes[newpath] || this.routes["/404"] || this.routes["/"];
 
     if (!route) {
+      return;
+    }
+
+    if (route.routeRules?.rule() === false) {
+      this.goto(route.routeRules.redirect);
       return;
     }
 

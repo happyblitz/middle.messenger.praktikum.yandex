@@ -3,7 +3,7 @@ import Button from "../../button";
 import Input from "../../input-field";
 import Avatar from "../../avatar";
 import type { User } from "../../../api/static-data/profile_fields_static";
-import FormValidator from "../../../utils/FormValidator";
+import FormValidator from "../../../utils/validation/FormValidator";
 import { isEventInForm, isSubmitRelatedTarget } from "../../../utils/Dom";
 import type { SyncInputsArgs } from "../../../core/Block";
 import hbs from "./template.hbs?raw";
