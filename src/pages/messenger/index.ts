@@ -9,7 +9,6 @@ import hbs from "./template.hbs?raw";
 import burderIcon from "./burger.svg?raw";
 import { cssModalClosedClass } from "../../utils/Globals";
 import Modal from "../../utils/Modal";
-import UserApi from "../../api/UserApi";
 
 import "./styles.scss";
 
@@ -64,12 +63,6 @@ class MessengerPage extends Block<MessengerProps> {
   }
 
   protected componentDidMount() {
-    UserApi.getCurrentUser()
-      .then((user) => {
-        this.children.profile.setProps({ user });
-      })
-      .catch((error) => console.warn(error));
-
     ChannelAPI.getChannels()
       .then((channelListData) => {
         if (!channelListData) {

@@ -6,7 +6,7 @@ import set from "../utils/functions/set";
  * результат сравнения Observer(текущий стор) vs Observer(новый стор)
  * определяет, затрагивают ли изменения в стор этот компонент
  */
-type Observer = (state: StoreSate) => unknown;
+type Observer = (state: StoreState) => unknown;
 
 /**
  * @param action - функция, исполняемая при изменении актуальных данных в стор для компонента
@@ -14,7 +14,7 @@ type Observer = (state: StoreSate) => unknown;
  * @param currentState - результат функции Observer(текущий стор), создается во время подписки
  */
 type Listener = {
-  action: (state: StoreSate) => void;
+  action: (state: StoreState) => void;
   observer: Observer;
   currentState?: unknown;
 };
@@ -29,17 +29,47 @@ type FormErrors = {
 /**
  * Ключи стора
  */
-type StoreSate = {
+export type StoreState = {
   isAuthorized: boolean;
-  user?: Record<string, unknown>;
-  avatar?: string;
+  chats: Chat[];
+  user: User | null;
   errors?: {
     formRegister?: FormErrors;
+    formLogin?: FormErrors;
+    formProfile?: FormErrors;
+    formChangePassword?: FormErrors;
+    getUser?: unknown;
+    getChats?: unknown;
+    logout?: unknown;
+  };
+};
+
+export type User = {
+  first_name: string;
+  second_name: string;
+  avatar: string | null;
+  display_name?: string;
+  email: string;
+  login: string;
+  password: string;
+  phone: string;
+};
+
+type Chat = {
+  id: number;
+  title: string;
+  avatar?: string | null;
+  unread_count?: number;
+  created_by?: number;
+  last_message?: {
+    user?: User;
+    time: string;
+    content: string;
   };
 };
 
 class Store {
-  private state: StoreSate = { isAuthorized: false };
+  private state: StoreState = { isAuthorized: false, chats: [], user: null };
   private listeners: listeners = new Set();
 
   public getState() {
@@ -55,7 +85,7 @@ class Store {
    * @param newState Объект с новым состоянием
    */
   public setState(newState: Record<string, unknown>) {
-    this.state = merge(this.state, newState) as StoreSate;
+    this.state = merge(this.state, newState) as StoreState;
     // Уведомляем всех подписчиков об изменении
     this.emit();
   }
@@ -66,7 +96,7 @@ class Store {
    * @param value Выставляемое значение
    */
   public setStateByPath(path: string, value: unknown) {
-    this.state = set(this.state, path, value) as StoreSate;
+    this.state = set(this.state, path, value) as StoreState;
     // Уведомляем всех подписчиков об изменении
     this.emit();
   }
@@ -86,6 +116,8 @@ class Store {
 
   /** оповещение слушателей при условии, что отслеживаемое состояние изменилось */
   private emit() {
+    console.log("emit", this.state);
+
     this.listeners.forEach((listener) => {
       const newState = listener.observer(this.state);
       if (!isEqual(newState, listener.currentState)) {

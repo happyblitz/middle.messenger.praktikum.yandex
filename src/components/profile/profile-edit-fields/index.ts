@@ -1,27 +1,26 @@
 import FormBlock from "../../../core/FormBlock";
 import Button from "../../button";
 import Input from "../../input-field";
+import InfoMessage from "../../info-message";
 import Avatar from "../../avatar";
-import type { User } from "../../../api/static-data/profile_fields_static";
-import UserApi from "../../../api/UserApi";
+import type { User } from "../../../core/Store";
 import { isEventInForm, isSubmitRelatedTarget } from "../../../utils/Dom";
 import hbs from "./template.hbs?raw";
+import UserController from "../../../controllers/UserController";
+import store from "../../../core/Store";
 
 type ProfileEditFieldsProps = {
   user: User;
-  profileFields?: Omit<User, "avatar">;
 };
 
 class ProfileEditFields extends FormBlock<ProfileEditFieldsProps> {
   template = hbs;
 
   constructor(props: ProfileEditFieldsProps) {
-    const { avatar, ...profileFields } = { ...props.user };
-
-    super({ ...props, profileFields });
+    super(props);
 
     const avatarImg = new Avatar({
-      src: avatar.value,
+      src: this.props.user.avatar as string,
       className: ["profile__avatar"],
     });
 
@@ -43,17 +42,61 @@ class ProfileEditFields extends FormBlock<ProfileEditFieldsProps> {
             const formdata = new FormData(formElement);
             console.log("formdata => ", formdata);
 
-            UserApi.changeAvatar(formdata)
-              .then((image64) => {
-                this.children.avatarImg.setProps({
-                  src: image64,
-                });
-              })
-              .catch((error) => console.log(error));
+            // UserApi.changeAvatar(formdata)
+            //   .then((image64) => {
+            //     this.children.avatarImg.setProps({
+            //       src: image64,
+            //     });
+            //   })
+            //   .catch((error) => console.log(error));
           }
         }
       },
     });
+
+    const emailInput = new Input({
+      name: "email",
+      label: "Почта",
+      labelClassName: ["profile__data-container"],
+      value: this.props.user.email,
+    });
+
+    const loginInput = new Input({
+      name: "login",
+      label: "Логин",
+      labelClassName: ["profile__data-container"],
+      value: this.props.user.login,
+    });
+
+    const firstNameInput = new Input({
+      name: "first_name",
+      label: "Имя",
+      labelClassName: ["profile__data-container"],
+      value: this.props.user.first_name,
+    });
+
+    const secondNameInput = new Input({
+      name: "second_name",
+      label: "Фамилия",
+      labelClassName: ["profile__data-container"],
+      value: this.props.user.second_name,
+    });
+
+    const displayNameInput = new Input({
+      name: "display_name",
+      label: "Имя в чатах",
+      labelClassName: ["profile__data-container"],
+      value: this.props.user.display_name,
+    });
+
+    const phoneInput = new Input({
+      name: "phone",
+      label: "Телефон",
+      labelClassName: ["profile__data-container"],
+      value: this.props.user.phone,
+    });
+
+    const formInfo = new InfoMessage();
 
     const saveButton = new Button({
       text: "Сохранить",
@@ -64,6 +107,13 @@ class ProfileEditFields extends FormBlock<ProfileEditFieldsProps> {
     this.children = {
       avatarImg,
       avatarInput,
+      emailInput,
+      loginInput,
+      firstNameInput,
+      secondNameInput,
+      displayNameInput,
+      phoneInput,
+      formInfo,
       saveButton,
     };
 
@@ -94,38 +144,60 @@ class ProfileEditFields extends FormBlock<ProfileEditFieldsProps> {
           }
 
           const form = this.getRef("form") as HTMLFormElement;
-          const formdata = new FormData(form);
+          const formData = new FormData(form);
 
-          console.log("formdata => ", formdata);
-          formdata.forEach((value, key) => {
-            console.log(`Поле: ${key}, значение ${value}`);
-          });
+          if (this.controller instanceof UserController) {
+            this.controller.changeProfile(formData);
+          }
         }
       },
     };
   }
 
-  protected componentDidMount() {
-    if (this.props.profileFields) {
-      const elements: HTMLElement[] = [];
-      Object.entries(this.props.profileFields).forEach(([name, fieldData]) => {
-        if (this.children[name]) return;
+  protected componentDidMount(): void {
+    this.controller = new UserController();
 
-        const child = new Input({
-          name,
-          label: fieldData.label,
-          labelClassName: ["profile__data-container"],
-          value: fieldData.value,
-        });
+    this.unsubscribers.push(
+      store.subscribe({
+        action: (state) => {
+          // общая ошибка (в основном от апи)
+          if (state.errors?.formProfile?.form) {
+            this.children.formInfo.setProps({
+              text: state.errors.formProfile.form,
+              error: true,
+              success: false,
+            });
+          }
 
-        this.children[name] = child;
+          // ошибки валидации полей
+          if (state.errors?.formProfile?.fields) {
+            const errors = state.errors.formProfile.fields;
+            this.inputsSetErrors(errors);
+          }
+        },
+        observer: (state) => [
+          state.errors?.formProfile?.form,
+          state.errors?.formProfile?.fields,
+        ],
+      }),
+    );
 
-        elements.push(child.element() as HTMLElement);
-      });
-
-      const container = this.getRef("profile-fields") as HTMLElement;
-      container.append(...elements);
-    }
+    this.unsubscribers.push(
+      store.subscribe({
+        action: (state) => {
+          if (state.user) {
+            this.setProps({ user: state.user });
+            this.children.formInfo.setProps({
+              text: "сохранено",
+              error: false,
+              success: true,
+              className: "center",
+            });
+          }
+        },
+        observer: (state) => state.user,
+      }),
+    );
   }
 }
 

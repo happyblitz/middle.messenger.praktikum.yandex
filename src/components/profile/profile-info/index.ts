@@ -1,28 +1,24 @@
 import Block from "../../../core/Block";
 import Button from "../../button";
 import Avatar from "../../avatar";
-import type { User } from "../../../api/static-data/profile_fields_static";
+import type { User } from "../../../core/Store";
 import hbs from "./template.hbs?raw";
+import AuthController from "../../../controllers/AuthController";
 
 type ProfileInfoProps = {
   user: User;
   onEditProfile: () => void;
   onChangePasswrod: () => void;
-  profileFields?: Omit<User, "avatar">;
 };
 
 class ProfileInfo extends Block<ProfileInfoProps> {
   template = hbs;
 
   constructor(props: ProfileInfoProps) {
-    const { avatar, ...profileFields } = { ...props.user };
-
-    super({ ...props, profileFields });
-
-    this.props.profileFields = profileFields;
+    super(props);
 
     const avatarImg = new Avatar({
-      src: avatar.value,
+      src: this.props.user.avatar as string,
       className: ["profile__avatar"],
     });
 
@@ -41,6 +37,10 @@ class ProfileInfo extends Block<ProfileInfoProps> {
     const logoutButton = new Button({
       text: "Выйти",
       className: ["profile__controls-logout"],
+      onClick: () => {
+        const controller = new AuthController();
+        controller.logout();
+      },
     });
 
     this.children = {

@@ -4,12 +4,14 @@ import ProfileEditFields from "./profile-edit-fields";
 import ProfileChangePassword from "./profile-change-password";
 import ProfileFooter from "./profile-footer";
 import hbs from "./template.hbs?raw";
-import type { User } from "../../api/static-data/profile_fields_static";
 import "./styles.scss";
+import store from "../../core/Store";
+import type { User } from "../../core/Store";
+import * as userUtils from "../../utils/User";
 
 type ProfileProps = {
   page: "info" | "edit-fields" | "edit-password";
-  user?: User;
+  user?: User | null;
   onDeepClose: () => void;
 };
 
@@ -17,7 +19,7 @@ class Profile extends Block<ProfileProps> {
   template = hbs;
 
   constructor(props: ProfileProps) {
-    super(props);
+    super({ ...props, user: store.getState().user });
 
     const footer = new ProfileFooter({ onDeepClose: null });
 
@@ -28,6 +30,9 @@ class Profile extends Block<ProfileProps> {
 
   protected beforeCompile() {
     if (this.props.user) {
+      this.props.user.display_name = userUtils.getDisplayName(this.props.user);
+      this.props.user.avatar = userUtils.getUserAvatar(this.props.user);
+
       switch (this.props.page) {
         case "info":
           this.children.content = new ProfileInfo({

@@ -1,16 +1,27 @@
-import user from "./static-data/profile_fields_static";
-import type { User } from "./static-data/profile_fields_static";
-import { toBase64 } from "../utils/Globals";
+import Api from "./API";
 
-class UserApi {
-  public static async getCurrentUser(): Promise<User> {
-    return user;
+class UserApi extends Api {
+  constructor() {
+    super("/user");
   }
 
-  public static async changeAvatar(formdata: FormData): Promise<string> {
-    const image = formdata.get("avatar") as File;
-    return await toBase64(image);
+  profile(data: Record<string, string>) {
+    return this.put("/profile", { data });
   }
+
+  // profileAvatar(data: Record<string, string>) {
+  //   return this.put("/profile/avatar", { data });
+  // }
+
+  // password(data: Record<string, string>) {
+  //   return this.put("/password", { data });
+  // }
+
+  // search() {
+  //   return this.post("/search");
+  // }
 }
 
-export default UserApi;
+const userApi = new UserApi();
+
+export default userApi;

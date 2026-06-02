@@ -1,10 +1,9 @@
 import FormBlock from "../../core/FormBlock";
-import store from "../../core/Store";
 import AuthController from "../../controllers/AuthController";
-import type Controller from "../../core/Controller";
+import store from "../../core/Store";
 import type { SyncInputsArgs } from "../../core/FormBlock";
 import Input from "../../components/input-field";
-import InputError from "../../components/input-error";
+import InfoMessage from "../../components/info-message";
 import Button from "../../components/button";
 import FormValidator from "../../utils/validation/FormValidator";
 import { isEventInForm, isSubmitRelatedTarget } from "../../utils/Dom";
@@ -12,7 +11,6 @@ import hbs from "./template.hbs?raw";
 
 class RegisterPage extends FormBlock<object> {
   template = hbs;
-  controller: Controller | null = null;
 
   constructor() {
     super({ sign_in: "/login" });
@@ -63,7 +61,7 @@ class RegisterPage extends FormBlock<object> {
       autocomplete: "off",
     });
 
-    const formError = new InputError();
+    const formError = new InfoMessage();
 
     const submitButton = new Button({
       type: "submit",
@@ -189,35 +187,20 @@ class RegisterPage extends FormBlock<object> {
         if (state.errors?.formRegister?.form) {
           this.children.formError.setProps({
             text: state.errors.formRegister.form,
+            error: true,
           });
         }
 
         // ошибки валидации полей
         if (state.errors?.formRegister?.fields) {
           const errors = state.errors.formRegister.fields;
-          Object.values(this.children).forEach((childComponent) => {
-            if (childComponent.isInputComponent === true) {
-              const input = childComponent.getRef("input") as HTMLInputElement;
-              if (errors[input.name]) {
-                childComponent.setProps({
-                  errorText: errors[input.name],
-                  value: input.value,
-                });
-              }
-            }
-          });
-
-          this.children.formError.setProps({
-            text: state.errors.formRegister.form,
-          });
+          this.inputsSetErrors(errors);
         }
       },
-      observer: (state) => {
-        return [
-          state.errors?.formRegister?.form,
-          state.errors?.formRegister?.fields,
-        ];
-      },
+      observer: (state) => [
+        state.errors?.formRegister?.form,
+        state.errors?.formRegister?.fields,
+      ],
     });
 
     this.unsubscribers.push(unsibscribe);

@@ -2,11 +2,12 @@ import FormBlock from "../../../core/FormBlock";
 import Button from "../../button";
 import Input from "../../input-field";
 import Avatar from "../../avatar";
-import type { User } from "../../../api/static-data/profile_fields_static";
+import type { User } from "../../../core/Store";
 import FormValidator from "../../../utils/validation/FormValidator";
 import { isEventInForm, isSubmitRelatedTarget } from "../../../utils/Dom";
 import type { SyncInputsArgs } from "../../../core/FormBlock";
 import hbs from "./template.hbs?raw";
+import InfoMessage from "../../info-message";
 
 type ProfileChangePasswordProps = {
   user: User;
@@ -19,7 +20,7 @@ class ProfileChangePassword extends FormBlock<ProfileChangePasswordProps> {
     super(props);
 
     const avatarImg = new Avatar({
-      src: this.props.user.avatar.value,
+      src: this.props.user.avatar ?? "",
       className: ["profile__avatar"],
     });
 
@@ -38,6 +39,7 @@ class ProfileChangePassword extends FormBlock<ProfileChangePasswordProps> {
       labelClassName: ["profile__data-container"],
       autocomplete: "new_password",
     });
+
     const confirmPasswordInput = new Input({
       type: "password",
       name: "new_password_confirm",
@@ -45,6 +47,9 @@ class ProfileChangePassword extends FormBlock<ProfileChangePasswordProps> {
       labelClassName: ["profile__data-container"],
       autocomplete: "new_password_confirm",
     });
+
+    const formInfo = new InfoMessage();
+
     const saveButton = new Button({
       type: "submit",
       text: "Сохранить",
@@ -56,6 +61,7 @@ class ProfileChangePassword extends FormBlock<ProfileChangePasswordProps> {
       oldPassInput,
       passwordInput,
       confirmPasswordInput,
+      formInfo,
       saveButton,
     };
 

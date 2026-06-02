@@ -1,5 +1,6 @@
 import Block from "./Block";
 import FormValidator from "../utils/validation/FormValidator";
+import Controller from "./Controller";
 
 export type SyncInputsArgs = {
   setProps?: boolean;
@@ -8,6 +9,8 @@ export type SyncInputsArgs = {
 };
 
 abstract class FormBlock<Props extends object> extends Block<Props> {
+  controller: Controller | null = null;
+
   /**
    * Валидирует input поля
    * @param setProps Пересобрать инпут блок или нет
@@ -54,6 +57,24 @@ abstract class FormBlock<Props extends object> extends Block<Props> {
     }
 
     return isValid;
+  }
+
+  /**
+   * Выставляет ошибки в input поля формы
+   * @param errors
+   */
+  protected inputsSetErrors(errors: Record<string, string>) {
+    Object.values(this.children).forEach((childComponent) => {
+      if (childComponent.isInputComponent === true) {
+        const input = childComponent.getRef("input") as HTMLInputElement;
+        if (errors[input.name]) {
+          childComponent.setProps({
+            errorText: errors[input.name],
+            value: input.value,
+          });
+        }
+      }
+    });
   }
 }
 

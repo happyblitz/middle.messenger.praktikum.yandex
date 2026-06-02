@@ -1,23 +1,27 @@
-import API_SETTINGS from "../scripts/api.settings";
-import HTTPTransport from "../core/HTTPTransport";
-import type { HTTPRequestRejected } from "../core/HTTPTransport";
+import Api from "./API";
 
-class AuthApi {
-  private static endpoint = API_SETTINGS.baseUrl + "/auth";
-  private static transport = new HTTPTransport(AuthApi.endpoint);
+class AuthApi extends Api {
+  constructor() {
+    super("/auth");
+  }
 
-  public static async singUp(
-    data: Record<string, string>,
-  ): Promise<Record<string, unknown>> {
-    try {
-      return (await this.transport.post("/signup", { data })) as Record<
-        string,
-        unknown
-      >;
-    } catch (e) {
-      return e as HTTPRequestRejected;
-    }
+  signUp(data: Record<string, string>) {
+    return this.post("/signup", { data });
+  }
+
+  signIn(data: Record<string, string>) {
+    return this.post("/signin", { data });
+  }
+
+  user() {
+    return this.get("/user");
+  }
+
+  logOut() {
+    return this.post("/logout");
   }
 }
 
-export default AuthApi;
+const authApi = new AuthApi();
+
+export default authApi;

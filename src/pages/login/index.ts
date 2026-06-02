@@ -1,7 +1,9 @@
 import FormBlock from "../../core/FormBlock";
+import AuthController from "../../controllers/AuthController";
+import store from "../../core/Store";
 import Input from "../../components/input-field";
 import Button from "../../components/button";
-import InputError from "../../components/input-error";
+import InfoMessage from "../../components/info-message";
 import { isEventInForm } from "../../utils/Dom";
 import hbs from "./template.hbs?raw";
 
@@ -31,7 +33,7 @@ class LoginPage extends FormBlock<object> {
       disabled: true,
     });
 
-    const formError = new InputError();
+    const formError = new InfoMessage();
 
     this.children = {
       loginInput,
@@ -63,15 +65,42 @@ class LoginPage extends FormBlock<object> {
           }
 
           const form = this.getRef("form") as HTMLFormElement;
-          const formdata = new FormData(form);
+          const formData = new FormData(form);
 
-          console.log("formdata => ", formdata);
-          formdata.forEach((value, key) => {
-            console.log(`Поле: ${key}, значение ${value}`);
-          });
+          if (this.controller instanceof AuthController) {
+            this.controller.login(formData);
+          }
         }
       },
     };
+  }
+
+  protected componentDidMount(): void {
+    this.controller = new AuthController();
+
+    const unsibscribe = store.subscribe({
+      action: (state) => {
+        // общая ошибка (в основном от апи)
+        if (state.errors?.formLogin?.form) {
+          this.children.formError.setProps({
+            text: state.errors.formLogin.form,
+            error: true,
+          });
+        }
+
+        // ошибки валидации полей
+        if (state.errors?.formLogin?.fields) {
+          const errors = state.errors.formLogin.fields;
+          this.inputsSetErrors(errors);
+        }
+      },
+      observer: (state) => [
+        state.errors?.formLogin?.form,
+        state.errors?.formLogin?.fields,
+      ],
+    });
+
+    this.unsubscribers.push(unsibscribe);
   }
 }
 

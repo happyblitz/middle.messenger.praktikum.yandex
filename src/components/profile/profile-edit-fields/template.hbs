@@ -7,7 +7,11 @@
     <h2 class="h2 profile__username">user</h2>
   </div>
   <form class="contents" action="" ref="form">
-    <div class="profile__data clear-input" ref="profile-fields"></div>
+    <div class="profile__data">
+      {{{emailInput}}} {{{loginInput}}} {{{firstNameInput}}}
+      {{{secondNameInput}}} {{{displayNameInput}}} {{{phoneInput}}}
+      <div class="relative">{{{formInfo}}}</div>
+    </div>
     <div class="profile__controls">{{{saveButton}}}</div>
   </form>
 </div>

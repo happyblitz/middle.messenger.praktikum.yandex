@@ -4,12 +4,30 @@
     <h2 class="h2 profile__username">user</h2>
   </div>
   <div class="profile__data">
-    {{#each profileFields}}
     <dl class="profile__data-container">
-      <dt class="profile__data-term">{{label}}</dt>
-      <dd class="profile__data-value">{{value}}</dd>
+      <dt class="profile__data-term">Почта</dt>
+      <dd class="profile__data-value">{{user.email}}</dd>
     </dl>
-    {{/each}}
+    <dl class="profile__data-container">
+      <dt class="profile__data-term">Логин</dt>
+      <dd class="profile__data-value">{{user.login}}</dd>
+    </dl>
+    <dl class="profile__data-container">
+      <dt class="profile__data-term">Имя</dt>
+      <dd class="profile__data-value">{{user.first_name}}</dd>
+    </dl>
+    <dl class="profile__data-container">
+      <dt class="profile__data-term">Фамилия</dt>
+      <dd class="profile__data-value">{{user.second_name}}</dd>
+    </dl>
+    <dl class="profile__data-container">
+      <dt class="profile__data-term">Имя в чатах</dt>
+      <dd class="profile__data-value">{{user.display_name}}</dd>
+    </dl>
+    <dl class="profile__data-container">
+      <dt class="profile__data-term">Телефон</dt>
+      <dd class="profile__data-value">{{user.phone}}</dd>
+    </dl>
   </div>
   <div class="profile__controls">
     {{{editProfileButton}}}{{{newPasswordButton}}}{{{logoutButton}}}

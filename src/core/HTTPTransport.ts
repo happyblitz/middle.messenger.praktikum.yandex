@@ -40,7 +40,7 @@ type RequestOptions = {
   timeout?: number;
 };
 
-type HTTPTransportOptions = Omit<RequestOptions, "method">;
+export type HTTPTransportOptions = Omit<RequestOptions, "method">;
 
 export type HTTPRequestRejected = {
   reason: string;
@@ -109,6 +109,8 @@ class HTTPTransport {
       const requestUrl = this.baseUrl + url;
 
       const xhr = new XMLHttpRequest();
+      xhr.withCredentials = true;
+
       const isGet = method === METHODS.GET;
 
       xhr.open(
