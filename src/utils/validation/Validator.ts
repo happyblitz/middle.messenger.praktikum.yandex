@@ -1,3 +1,9 @@
+const AVATAR_EXT = ["JPEG", "JPG", "PNG", "GIF", "WebP"];
+const avatarExtLower = AVATAR_EXT.map((value) => value.toLowerCase());
+export const accept = AVATAR_EXT.map((value) => "." + value.toLowerCase()).join(
+  ", ",
+);
+
 const VALIDATION_RULES = {
   first_name: {
     validator: /^[A-ZА-ЯЙЁ][a-zа-яёй]+((-[A-ZА-ЯЙЁ])?[a-zа-яёй]+)*$/,
@@ -20,7 +26,7 @@ const VALIDATION_RULES = {
     error: `Латиница, цифры и спецсимволы. Обязательны @ и точка после него.
 Между @ и точкой должны быть буквы.`,
   },
-  old_password: {
+  oldPassword: {
     validator: /\S/,
     error: "Введите ваш текущий пароль",
   },
@@ -28,7 +34,7 @@ const VALIDATION_RULES = {
     validator: /^(?=.*[0-9])(?=.*[A-ZА-Я])\S{8,40}$/,
     error: "8–40 символов, минимум одна заглавная буква и одна цифра.",
   },
-  new_password: {
+  newPassword: {
     validator: /^(?=.*[0-9])(?=.*[A-ZА-Я])\S{8,40}$/,
     error: "8–40 символов, минимум одна заглавная буква и одна цифра.",
   },
@@ -40,14 +46,31 @@ const VALIDATION_RULES = {
     validator: /\S/,
     error: "не должно быть пустым",
   },
+  avatar: {
+    validator: (fileName: string) => {
+      const ext = fileName.split(".").at(-1) ?? "";
+      return avatarExtLower.includes(ext.toLowerCase());
+    },
+    error: "Допустимые расширения файлов: " + AVATAR_EXT.join(", "),
+  },
 } as const;
 
 const validateField = (fieldName: string, value: string) => {
   if (!(fieldName in VALIDATION_RULES)) return null;
 
-  return VALIDATION_RULES[
-    fieldName as keyof typeof VALIDATION_RULES
-  ].validator.test(value)
+  const rule = VALIDATION_RULES[fieldName as keyof typeof VALIDATION_RULES];
+  const type = rule.validator.constructor.name;
+
+  let isValid;
+  if (type === "RegExp") {
+    isValid = (rule.validator as RegExp).test(value);
+  } else if (type === "Function") {
+    isValid = (rule.validator as Function)(value);
+  } else {
+    isValid = true;
+  }
+
+  return isValid
     ? null
     : VALIDATION_RULES[fieldName as keyof typeof VALIDATION_RULES].error;
 };

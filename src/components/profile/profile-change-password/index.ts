@@ -3,11 +3,11 @@ import Button from "../../button";
 import Input from "../../input-field";
 import Avatar from "../../avatar";
 import type { User } from "../../../core/Store";
-import FormValidator from "../../../utils/validation/FormValidator";
-import { isEventInForm, isSubmitRelatedTarget } from "../../../utils/Dom";
-import type { SyncInputsArgs } from "../../../core/FormBlock";
+import { isSubmitRelatedTarget } from "../../../utils/Dom";
 import hbs from "./template.hbs?raw";
 import InfoMessage from "../../info-message";
+import UserController from "../../../controllers/UserController";
+import store from "../../../core/Store";
 
 type ProfileChangePasswordProps = {
   user: User;
@@ -26,7 +26,7 @@ class ProfileChangePassword extends FormBlock<ProfileChangePasswordProps> {
 
     const oldPassInput = new Input({
       type: "password",
-      name: "old_password",
+      name: "oldPassword",
       label: "Текущий пароль",
       labelClassName: ["profile__data-container"],
       autocomplete: "password",
@@ -34,18 +34,18 @@ class ProfileChangePassword extends FormBlock<ProfileChangePasswordProps> {
 
     const passwordInput = new Input({
       type: "password",
-      name: "new_password",
+      name: "newPassword",
       label: "Новый пароль",
       labelClassName: ["profile__data-container"],
-      autocomplete: "new_password",
+      autocomplete: "newPassword",
     });
 
     const confirmPasswordInput = new Input({
       type: "password",
-      name: "new_password_confirm",
+      name: "newPassword_confirm",
       label: "Повторите новый пароль",
       labelClassName: ["profile__data-container"],
-      autocomplete: "new_password_confirm",
+      autocomplete: "newPassword_confirm",
     });
 
     const formInfo = new InfoMessage();
@@ -67,81 +67,61 @@ class ProfileChangePassword extends FormBlock<ProfileChangePasswordProps> {
 
     this.events = {
       focusout: (event: Event) => {
-        const form = this.getRef("form");
-        if (isEventInForm(event, form)) {
+        if (this.isFormEvent(event)) {
           const input = event.target as HTMLInputElement;
 
           // Фокус перешёл на кнопку submit текущей формы
           // Проверкой займется submit формы
-          if (isSubmitRelatedTarget(event as FocusEvent, form)) {
+          if (isSubmitRelatedTarget(event as FocusEvent, this.getRef("form"))) {
             return;
           }
 
-          this.syncInputsState({ inputName: input.name, strict: false });
+          this.formValidate({ fieldName: input.name, strict: false });
         }
       },
       submit: (event: Event) => {
-        const form = this.getRef("form");
-        if (isEventInForm(event, form)) {
+        if (this.isFormEvent(event)) {
           event.preventDefault();
 
-          const formIsValid = this.syncInputsState();
-
+          const formIsValid = this.formValidate();
           if (!formIsValid) {
             return;
           }
 
-          const form = this.getRef("form") as HTMLFormElement;
-          const formdata = new FormData(form);
+          this.children.saveButton.setProps({ disabled: true });
 
-          console.log("formdata => ", formdata);
-          formdata.forEach((value, key) => {
-            console.log(`Поле: ${key}, значение ${value}`);
-          });
+          if (this.controller instanceof UserController) {
+            const formData = this.getFormData();
+            this.controller.changePassword(formData);
+          }
         }
       },
     };
   }
 
-  protected syncInputsState(args: SyncInputsArgs = {}): boolean {
-    const { setProps = true, inputName = "", strict = true } = args;
+  protected componentDidMount(): void {
+    this.controller = new UserController();
 
-    // проверка полей, для которых указано regexp
-    let isValid = super.syncInputsState({ setProps, inputName, strict });
+    this.formErrorListener(
+      "changePassword",
+      this.children.saveButton as Button,
+      this.children.formInfo as InfoMessage,
+    );
 
-    // требуется ли валидация поля password-confirm
-    const shouldValidateConPassInput =
-      !inputName ||
-      ["new_password", "new_password_confirm"].includes(inputName);
+    this.unsubscribers.push(
+      store.subscribe({
+        action: (state) => {
+          if (state.response?.form?.changePassword) {
+            this.children.saveButton.setProps({ disabled: false });
+            this.formSuccessMessage(this.children.formInfo as InfoMessage);
+            store.setStateByPath("response.form.changePassword", null);
+          }
+        },
+        observer: (state) => state.response?.form?.changePassword,
+      }),
+    );
 
-    // проверка поля password-confirm
-    if (shouldValidateConPassInput) {
-      const passInput = this.children.passwordInput.getRef(
-        "input",
-      ) as HTMLInputElement;
-      const conPassInput = this.children.confirmPasswordInput.getRef(
-        "input",
-      ) as HTMLInputElement;
-
-      const errorText = FormValidator.validateConPassField(
-        passInput.value,
-        conPassInput.value,
-        strict,
-      );
-
-      if (errorText) {
-        isValid = false;
-      }
-
-      if (setProps) {
-        this.children.confirmPasswordInput.setProps({
-          errorText,
-          value: conPassInput.value,
-        });
-      }
-    }
-
-    return isValid;
+    super.componentDidMount();
   }
 }
 

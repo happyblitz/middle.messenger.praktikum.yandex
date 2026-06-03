@@ -34,7 +34,7 @@ type HTTPHeaders = Record<string, string>;
 
 type RequestOptions = {
   method: string;
-  data?: Record<string, string>;
+  data?: Record<string, string> | FormData;
   headers?: HTTPHeaders;
   responseType?: XMLHttpRequestResponseType;
   timeout?: number;

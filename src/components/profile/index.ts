@@ -19,7 +19,7 @@ class Profile extends Block<ProfileProps> {
   template = hbs;
 
   constructor(props: ProfileProps) {
-    super({ ...props, user: store.getState().user });
+    super(props);
 
     const footer = new ProfileFooter({ onDeepClose: null });
 
@@ -29,9 +29,13 @@ class Profile extends Block<ProfileProps> {
   }
 
   protected beforeCompile() {
+    const user = store.getState().user;
+    this.props.user = user ? { ...user } : null;
+
     if (this.props.user) {
-      this.props.user.display_name = userUtils.getDisplayName(this.props.user);
-      this.props.user.avatar = userUtils.getUserAvatar(this.props.user);
+      const display_name = userUtils.getDisplayName(this.props.user);
+      const avatar = userUtils.getUserAvatar(this.props.user);
+      this.props.user = { ...this.props.user, display_name, avatar };
 
       switch (this.props.page) {
         case "info":

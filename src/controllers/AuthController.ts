@@ -1,15 +1,16 @@
-import FormController from "../core/FormController";
+import Controller from "../core/Controller";
 import store from "../core/Store";
 import authApi from "../api/AuthAPI";
 import ChatsController from "./ChatsController";
+import FormValidator from "../utils/validation/FormValidator";
 
-class AuthController extends FormController {
+class AuthController extends Controller {
   public newUser(formData: FormData) {
     const { data, errors } = this.formValidate(formData);
 
     if (Object.keys(errors).length) {
       // ошибки валидации полей формы отправляем напрямую в стор
-      store.setStateByPath("errors.formRegister.fields", errors);
+      store.setStateByPath("errors.form.register.fields", errors);
       return;
     }
 
@@ -20,10 +21,8 @@ class AuthController extends FormController {
   protected async newUserRequest(data: Record<string, string>) {
     const response = await authApi.signUp(data);
 
-    console.log("signUp", response);
-
     if (response?.reason) {
-      store.setStateByPath("errors.formRegister.form", response.reason);
+      store.setStateByPath("errors.form.register.form", response.reason);
       return;
     }
 
@@ -31,11 +30,21 @@ class AuthController extends FormController {
   }
 
   public login(formData: FormData) {
-    const { data, errors } = this.formValidate(formData);
+    const data: Record<string, string> = {};
 
-    if (Object.keys(errors).length) {
-      // ошибки валидации полей формы отправляем напрямую в стор
-      store.setStateByPath("errors.formLogin.fields", errors);
+    formData.forEach((value, key) => {
+      data[key] = this.fieldPrepair(value as string);
+    });
+
+    // для логина требуется только заполненность полей
+    const isValidForm = FormValidator.allFieldsFilled(data);
+
+    // Не все поля заполнены, форма не валидна
+    if (!isValidForm) {
+      store.setStateByPath(
+        "errors.form.login.form",
+        "Все поля должны быть заполнены",
+      );
       return;
     }
 
@@ -46,10 +55,8 @@ class AuthController extends FormController {
   protected async loginRequest(data: Record<string, string>) {
     const response = await authApi.signIn(data);
 
-    console.log("signIn", response);
-
     if (response?.reason) {
-      store.setStateByPath("errors.formLogin.form", response.reason);
+      store.setStateByPath("errors.form.login.form", response.reason);
       return;
     }
 
@@ -71,8 +78,6 @@ class AuthController extends FormController {
 
   protected async getUserRequest(): Promise<boolean> {
     const response = await authApi.user();
-
-    console.log("user", response);
 
     if (response?.reason) {
       store.setState({

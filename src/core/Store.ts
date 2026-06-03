@@ -34,24 +34,26 @@ export type StoreState = {
   chats: Chat[];
   user: User | null;
   errors?: {
-    formRegister?: FormErrors;
-    formLogin?: FormErrors;
-    formProfile?: FormErrors;
-    formChangePassword?: FormErrors;
+    form?: FormErrorState;
     getUser?: unknown;
     getChats?: unknown;
     logout?: unknown;
   };
+  response?: {
+    form?: {
+      changePassword?: unknown;
+    };
+  };
 };
 
 export type User = {
+  id?: number;
   first_name: string;
   second_name: string;
   avatar: string | null;
   display_name?: string;
   email: string;
   login: string;
-  password: string;
   phone: string;
 };
 
@@ -66,6 +68,14 @@ type Chat = {
     time: string;
     content: string;
   };
+};
+
+export type FormErrorState = {
+  register?: FormErrors;
+  login?: FormErrors;
+  profile?: FormErrors;
+  changePassword?: FormErrors;
+  avatar?: FormErrors;
 };
 
 class Store {
@@ -96,6 +106,7 @@ class Store {
    * @param value Выставляемое значение
    */
   public setStateByPath(path: string, value: unknown) {
+    console.log(path, value);
     this.state = set(this.state, path, value) as StoreState;
     // Уведомляем всех подписчиков об изменении
     this.emit();

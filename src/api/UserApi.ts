@@ -9,13 +9,13 @@ class UserApi extends Api {
     return this.put("/profile", { data });
   }
 
-  // profileAvatar(data: Record<string, string>) {
-  //   return this.put("/profile/avatar", { data });
-  // }
+  profileAvatar(formData: FormData) {
+    return this.put("/profile/avatar", { data: formData });
+  }
 
-  // password(data: Record<string, string>) {
-  //   return this.put("/password", { data });
-  // }
+  password(data: Record<string, string>) {
+    return this.put("/password", { data });
+  }
 
   // search() {
   //   return this.post("/search");

@@ -1,6 +1,6 @@
 import Block from "../../core/Block";
 import Modal from "../../utils/Modal";
-import { getFilename } from "../../utils/Globals";
+import { getFileName } from "../../utils/Globals";
 import ChannelAPI from "../../api/ChannelApi";
 import type { Message } from "../../api/static-data/messages_static";
 import Input from "../input-field";
@@ -310,7 +310,7 @@ class ChannelWindow extends Block<ChannelWindowProps> {
   private getMessageElement(message: Message) {
     const ChannelMessageProps = {
       ...message,
-      imageDesc: getFilename(message.image ?? ""),
+      imageDesc: getFileName(message.image ?? ""),
     };
 
     const channelMessage = new ChannelMessage(ChannelMessageProps);

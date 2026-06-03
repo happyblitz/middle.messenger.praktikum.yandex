@@ -1,10 +1,8 @@
 import FormBlock from "../../core/FormBlock";
 import AuthController from "../../controllers/AuthController";
-import store from "../../core/Store";
 import Input from "../../components/input-field";
 import Button from "../../components/button";
 import InfoMessage from "../../components/info-message";
-import { isEventInForm } from "../../utils/Dom";
 import hbs from "./template.hbs?raw";
 
 class LoginPage extends FormBlock<object> {
@@ -44,30 +42,20 @@ class LoginPage extends FormBlock<object> {
 
     this.events = {
       input: (event) => {
-        const form = this.getRef("form");
-        if (isEventInForm(event, form)) {
-          const submitButton = this.children.submitButton.getRef(
-            "button",
-          ) as HTMLButtonElement;
-
-          submitButton.disabled = !this.syncInputsState({ setProps: false });
+        if (this.isFormEvent(event)) {
+          // проверяем только заполненность всех полей
+          const disabled = !this.allFieldsFilled();
+          this.children.submitButton.setProps({ disabled });
         }
       },
       submit: (event) => {
-        const form = this.getRef("form");
-        if (isEventInForm(event, form)) {
+        if (this.isFormEvent(event)) {
           event.preventDefault();
 
-          const formIsValid = this.syncInputsState();
-
-          if (!formIsValid) {
-            return;
-          }
-
-          const form = this.getRef("form") as HTMLFormElement;
-          const formData = new FormData(form);
+          this.children.submitButton.setProps({ disabled: true });
 
           if (this.controller instanceof AuthController) {
+            const formData = this.getFormData();
             this.controller.login(formData);
           }
         }
@@ -76,31 +64,13 @@ class LoginPage extends FormBlock<object> {
   }
 
   protected componentDidMount(): void {
+    super.componentDidMount();
     this.controller = new AuthController();
-
-    const unsibscribe = store.subscribe({
-      action: (state) => {
-        // общая ошибка (в основном от апи)
-        if (state.errors?.formLogin?.form) {
-          this.children.formError.setProps({
-            text: state.errors.formLogin.form,
-            error: true,
-          });
-        }
-
-        // ошибки валидации полей
-        if (state.errors?.formLogin?.fields) {
-          const errors = state.errors.formLogin.fields;
-          this.inputsSetErrors(errors);
-        }
-      },
-      observer: (state) => [
-        state.errors?.formLogin?.form,
-        state.errors?.formLogin?.fields,
-      ],
+    this.formErrorListener({
+      formKey: "login",
+      submitBtn: this.children.submitButton as Button,
+      formInfo: this.children.formError as InfoMessage,
     });
-
-    this.unsubscribers.push(unsibscribe);
   }
 }
 

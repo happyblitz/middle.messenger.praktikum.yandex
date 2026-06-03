@@ -1,14 +1,14 @@
-import FormController from "../core/FormController";
+import Controller from "../core/Controller";
 import store from "../core/Store";
 import userApi from "../api/UserApi";
 
-class UserController extends FormController {
+class UserController extends Controller {
   public changeProfile(formData: FormData) {
     const { data, errors } = this.formValidate(formData);
 
     if (Object.keys(errors).length) {
       // ошибки валидации полей формы отправляем напрямую в стор
-      store.setStateByPath("errors.formProfile.fields", errors);
+      store.setStateByPath("errors.form.profile.fields", errors);
       return;
     }
 
@@ -19,10 +19,59 @@ class UserController extends FormController {
   protected async changeProfileRequest(data: Record<string, string>) {
     const response = await userApi.profile(data);
 
-    console.log("profile", response);
+    if (response?.reason) {
+      store.setStateByPath("errors.form.profile.form", response.reason);
+      return;
+    }
+
+    store.setState({
+      user: response,
+    });
+  }
+
+  public changePassword(formData: FormData) {
+    const { data, errors } = this.formValidate(formData);
+
+    if (Object.keys(errors).length) {
+      // ошибки валидации полей формы отправляем напрямую в стор
+      store.setStateByPath("errors.form.changePassword.fields", errors);
+      return;
+    }
+
+    //отправляем данные
+    this.changePasswordRequest(data);
+  }
+
+  protected async changePasswordRequest(data: Record<string, string>) {
+    const response = await userApi.password(data);
 
     if (response?.reason) {
-      store.setStateByPath("errors.formProfile.form", response.reason);
+      store.setStateByPath("errors.form.changePassword.form", response.reason);
+      return;
+    }
+
+    store.setStateByPath("response.form.changePassword", response);
+  }
+
+  public changeAvatar(formData: FormData) {
+    const { errors } = this.formValidate(formData);
+
+    if (Object.keys(errors).length) {
+      // ошибки валидации полей формы отправляем напрямую в стор
+      const error = Object.values(errors).join(". ");
+      store.setStateByPath("errors.form.avatar.form", error);
+      return;
+    }
+
+    //отправляем данные
+    this.changeAvatarRequest(formData);
+  }
+
+  protected async changeAvatarRequest(data: FormData) {
+    const response = await userApi.profileAvatar(data);
+
+    if (response?.reason) {
+      store.setStateByPath("errors.form.avatar.form", response.reason);
       return;
     }
 

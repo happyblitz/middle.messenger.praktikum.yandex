@@ -24,7 +24,7 @@ class Input extends Block<InputProps> {
   constructor(props: InputProps) {
     super(props);
 
-    this.isInputComponent = true;
+    this.isFormElement = true;
 
     this.children = {};
 
@@ -49,6 +49,24 @@ class Input extends Block<InputProps> {
     } else {
       delete this.children.inputError;
     }
+  }
+
+  public getFormElementInfo() {
+    return {
+      name: this.props.name,
+      type: this.props.type ?? "text",
+    };
+  }
+
+  public getFormElementValue() {
+    return (this.getRef("input") as HTMLInputElement).value;
+  }
+
+  public setFormElementError(errorText: string) {
+    this.setProps({
+      errorText,
+      value: (this.getRef("input") as HTMLInputElement).value,
+    });
   }
 }
 
