@@ -53,6 +53,10 @@ const VALIDATION_RULES = {
     },
     error: "Допустимые расширения файлов: " + AVATAR_EXT.join(", "),
   },
+  channelTitle: {
+    validator: /\S/,
+    error: "Введите название чата",
+  },
 } as const;
 
 const validateField = (fieldName: string, value: string) => {
@@ -65,7 +69,7 @@ const validateField = (fieldName: string, value: string) => {
   if (type === "RegExp") {
     isValid = (rule.validator as RegExp).test(value);
   } else if (type === "Function") {
-    isValid = (rule.validator as Function)(value);
+    isValid = (rule.validator as (v: string) => boolean)(value);
   } else {
     isValid = true;
   }

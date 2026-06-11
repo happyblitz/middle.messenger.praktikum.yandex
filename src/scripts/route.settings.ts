@@ -6,6 +6,7 @@ import ErrorPage from "../pages/error";
 import LoginPage from "../pages/login";
 import RegisterPage from "../pages/register";
 import MessengerPage from "../pages/messenger";
+import ProfilePage from "../pages/profile";
 
 type RouteRules = {
   rule: () => boolean; // должно вернуть true, иначе редирект
@@ -28,30 +29,38 @@ export type RoutesConfig = {
 };
 
 export const afterLogInRedirect = "/messenger";
-export const afterLogOutRedirect = "/login";
+export const afterLogOutRedirect = "/sign-in";
 
 const ROUTES: RoutesConfig = {
   afterLogInRedirect,
   afterLogOutRedirect,
   routes: {
-    "/": {
-      blockClass: NavigationPage,
-      props: {
-        links: navLinks,
-      },
-    },
-    "/login": {
+    "/sign-in": {
       blockClass: LoginPage,
       routeRules: {
         rule: () => !store.isAuthorized(),
         redirect: afterLogInRedirect,
       },
     },
-    "/register": {
+    "/sign-up": {
       blockClass: RegisterPage,
       routeRules: {
         rule: () => !store.isAuthorized(),
         redirect: afterLogInRedirect,
+      },
+    },
+    "/messenger": {
+      blockClass: MessengerPage,
+      routeRules: {
+        rule: () => store.isAuthorized(),
+        redirect: afterLogOutRedirect,
+      },
+    },
+    "/settings": {
+      blockClass: ProfilePage,
+      routeRules: {
+        rule: () => store.isAuthorized(),
+        redirect: afterLogOutRedirect,
       },
     },
     "/403": {
@@ -75,11 +84,10 @@ const ROUTES: RoutesConfig = {
         code_message: "Внутрення ошибка сервера",
       },
     },
-    "/messenger": {
-      blockClass: MessengerPage,
-      routeRules: {
-        rule: () => store.isAuthorized(),
-        redirect: afterLogOutRedirect,
+    "/": {
+      blockClass: NavigationPage,
+      props: {
+        links: navLinks,
       },
     },
   },

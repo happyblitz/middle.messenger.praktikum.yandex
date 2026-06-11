@@ -1,0 +1,23 @@
+@use "../../../styles/helpers" as *;
+
+.users-selected {
+  margin-top: var(--gap-small);
+  font-size: 0.95em;
+  display: flex;
+  gap: var(--gap-small);
+  flex-wrap: wrap;
+
+  button {
+    @include flex-center;
+
+    padding: 0;
+    padding-left: rem(4);
+    border: 1px solid var(--color-shadow);
+    background-color: var(--background-color-btn);
+    border-radius: var(--border-radius);
+  }
+
+  &__user-info {
+    color: hsl(130deg 78.46% 62.19%);
+  }
+}

@@ -1,0 +1,14 @@
+<div class="users-selected">
+  {{#each selectedUsers}}
+  <div class="users-selected__user">
+    <button type="button" data-id="{{id}}" title="Удалить" aria-label="Удалить">
+      <span
+        class="users-selected__user-info"
+        data-id="{{id}}"
+        title="{{first_name}} {{second_name}}"
+        >{{login}}</span
+      >{{{../closeIcon}}}
+    </button>
+  </div>
+  {{/each}}
+</div>

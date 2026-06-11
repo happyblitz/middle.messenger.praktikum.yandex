@@ -126,7 +126,7 @@ abstract class Block<Props extends object> {
   }
 
   /** Метод отрисовки элемента на странице */
-  protected render() {
+  public render() {
     this.unmountComponent();
     const fragment = this.compile();
 

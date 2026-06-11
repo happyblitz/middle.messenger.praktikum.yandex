@@ -12,4 +12,4 @@ const authController = new AuthController();
 await authController.entryPoint();
 
 const router = Router.getInstance(ROUTES);
-router.goto(window.location.pathname);
+router.gotoHidden(window.location.pathname);

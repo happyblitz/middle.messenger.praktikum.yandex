@@ -37,6 +37,7 @@ export type StoreState = {
     form?: FormErrorState;
     getUser?: unknown;
     getChats?: unknown;
+    getChatUsers?: unknown;
     logout?: unknown;
   };
   response?: {
@@ -44,39 +45,54 @@ export type StoreState = {
       changePassword?: unknown;
     };
   };
+  data?: {
+    userSearch?: {
+      requestId: number;
+      users: User[];
+    };
+    newChatId?: number;
+  };
+  chatUsers?: ChatUsers;
 };
 
+export type ChatUsers = Record<string, User[]>;
+
 export type User = {
-  id?: number;
+  id: number;
   first_name: string;
   second_name: string;
   avatar: string | null;
-  display_name?: string;
-  email: string;
+  display_name: string | null;
   login: string;
-  phone: string;
+  email?: string;
+  phone?: string;
+  role?: string;
 };
 
-type Chat = {
+export type Chat = {
   id: number;
   title: string;
   avatar?: string | null;
   unread_count?: number;
   created_by?: number;
   last_message?: {
-    user?: User;
+    user: User;
     time: string;
     content: string;
   };
 };
 
-export type FormErrorState = {
-  register?: FormErrors;
-  login?: FormErrors;
-  profile?: FormErrors;
-  changePassword?: FormErrors;
-  avatar?: FormErrors;
-};
+export type FormErrorState = Partial<
+  Record<
+    | "register"
+    | "login"
+    | "profile"
+    | "changePassword"
+    | "avatar"
+    | "chatSettings",
+    FormErrors
+  >
+>;
 
 class Store {
   private state: StoreState = { isAuthorized: false, chats: [], user: null };
@@ -86,6 +102,9 @@ class Store {
     return this.state;
   }
 
+  /**
+   * @returns Авторизован пользователь или нет
+   */
   public isAuthorized() {
     return this.state.isAuthorized;
   }
@@ -96,6 +115,7 @@ class Store {
    */
   public setState(newState: Record<string, unknown>) {
     this.state = merge(this.state, newState) as StoreState;
+
     // Уведомляем всех подписчиков об изменении
     this.emit();
   }
@@ -106,7 +126,6 @@ class Store {
    * @param value Выставляемое значение
    */
   public setStateByPath(path: string, value: unknown) {
-    console.log(path, value);
     this.state = set(this.state, path, value) as StoreState;
     // Уведомляем всех подписчиков об изменении
     this.emit();
@@ -127,8 +146,6 @@ class Store {
 
   /** оповещение слушателей при условии, что отслеживаемое состояние изменилось */
   private emit() {
-    console.log("emit", this.state);
-
     this.listeners.forEach((listener) => {
       const newState = listener.observer(this.state);
       if (!isEqual(newState, listener.currentState)) {

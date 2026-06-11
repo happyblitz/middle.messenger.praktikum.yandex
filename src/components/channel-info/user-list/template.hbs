@@ -1,0 +1,9 @@
+<div class="users-list">
+  {{#if usersList}}
+  <ul class="ul user-search__list">
+    {{#each usersList}}
+    <li data-id="{{id}}">{{login}} - {{first_name}} {{second_name}}</li>
+    {{/each}}
+  </ul>
+  {{/if}}
+</div>

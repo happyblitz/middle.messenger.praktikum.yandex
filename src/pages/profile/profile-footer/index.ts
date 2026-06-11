@@ -1,5 +1,5 @@
 import Block from "../../../core/Block";
-import Button from "../../button";
+import Button from "../../../components/button";
 import { fixedModalClass } from "../../../utils/Globals";
 import { cssModalClosedClass } from "../../../utils/Globals";
 import hbs from "./template.hbs?raw";

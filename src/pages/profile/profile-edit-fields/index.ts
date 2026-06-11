@@ -1,8 +1,8 @@
 import FormBlock from "../../../core/FormBlock";
-import Button from "../../button";
-import Input from "../../input-field";
-import InfoMessage from "../../info-message";
-import Avatar from "../../avatar";
+import Button from "../../../components/button";
+import Input from "../../../components/input-field";
+import InfoMessage from "../../../components/info-message";
+import Avatar from "../../../components/avatar";
 import type { User } from "../../../core/Store";
 import { isSubmitRelatedTarget } from "../../../utils/Dom";
 import hbs from "./template.hbs?raw";
@@ -16,6 +16,7 @@ type ProfileEditFieldsProps = {
 
 class ProfileEditFields extends FormBlock<ProfileEditFieldsProps> {
   template = hbs;
+  avatarFormName = "avatar-form";
 
   constructor(props: ProfileEditFieldsProps) {
     super(props);
@@ -31,10 +32,11 @@ class ProfileEditFields extends FormBlock<ProfileEditFieldsProps> {
       className: ["edit-logo__form-attach", "visually-hidden"],
       id: "edit-logo-attach",
       accept: accept,
+      formName: this.avatarFormName,
       onChange: (event) => {
-        if (this.isFormEvent(event, "avatar-form")) {
+        if (this.isFormEvent(event, this.avatarFormName)) {
           if (this.controller instanceof UserController) {
-            const formData = this.getFormData("avatar-form");
+            const formData = this.getFormData(this.avatarFormName);
             this.controller.changeAvatar(formData);
           }
         }
@@ -73,7 +75,7 @@ class ProfileEditFields extends FormBlock<ProfileEditFieldsProps> {
       name: "display_name",
       label: "Имя в чатах",
       labelClassName: ["profile__data-container"],
-      value: this.props.user.display_name,
+      value: this.props.user.display_name || "",
     });
 
     const phoneInput = new Input({
@@ -146,6 +148,7 @@ class ProfileEditFields extends FormBlock<ProfileEditFieldsProps> {
     this.formErrorListener({
       formKey: "avatar",
       formInfo: this.children.formAvatarInfo as InfoMessage,
+      formName: this.avatarFormName,
     });
     this.formErrorListener({
       formKey: "profile",

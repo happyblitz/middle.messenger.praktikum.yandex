@@ -1,5 +1,4 @@
 import Block from "../../core/Block";
-import Modal from "../../utils/Modal";
 import { getFileName } from "../../utils/Globals";
 import ChannelAPI from "../../api/ChannelApi";
 import type { Message } from "../../api/static-data/messages_static";
@@ -9,18 +8,25 @@ import TextArea from "../textarea";
 import ChannelMessage from "./channel-message";
 import ShowAttach from "./show-attach";
 import hbs from "./template.hbs?raw";
-import backIcon from "./back.svg?raw";
-import cancelIcon from "./close.svg?raw";
-import attachIcon from "./attach.svg?raw";
-import sendIcon from "./send.svg?raw";
+import backIcon from "../../resources/icons/back.svg?raw";
+import attachIcon from "../../resources/icons/attach.svg?raw";
+import sendIcon from "../../resources/icons/send.svg?raw";
+import settingsIcon from "../../resources/icons/settings.svg?raw";
+import type { Chat } from "../../core/Store";
+import ChannelInfo from "../channel-info";
+import store from "../../core/Store";
+import type { User } from "../../core/Store";
+import ChatsController from "../../controllers/ChatsController";
+import { getDisplayName, getUserAvatar } from "../../utils/Globals";
 import "./styles.scss";
 
 type ChannelWindowProps = {
-  id?: number;
-  username?: string;
+  chat?: Chat;
   attachIcon?: string;
   attachFieldName?: string;
   onBack: () => void;
+  chatUsers?: User[];
+  subTitle?: string;
 };
 
 class ChannelWindow extends Block<ChannelWindowProps> {
@@ -30,6 +36,8 @@ class ChannelWindow extends Block<ChannelWindowProps> {
     "channel__footer-form-send",
     this.cssHideClassName,
   ];
+  chatsController: ChatsController | null = null;
+  user: User = store.getState().user as User;
 
   constructor(props: ChannelWindowProps) {
     super({ attachFieldName: "attach", attachIcon, ...props });
@@ -39,31 +47,23 @@ class ChannelWindow extends Block<ChannelWindowProps> {
       className: ["channel__header-back"],
       ariaLabel: "к списку чатов",
       title: "к списку чатов",
-      onClick: this.props.onBack,
+      onClick: () => this.props.onBack(),
     });
 
-    const addToChatButton = new Button({
-      text: "Пригласить в чат",
+    const chatUsersButton = new Button({
+      text: "Пользователи",
       onClick: () => {
-        const modal = this.getRef("addUserModal");
-        if (modal) {
-          Modal.openModal(modal);
-        }
+        this.children.channelInfo.setProps({ show: true });
       },
     });
 
-    const removeFromChatButton = new Button({
-      text: "Удалить из чата",
-      onClick: () => {
-        const modal = this.getRef("removeUserModal");
-        if (modal) {
-          Modal.openModal(modal);
-        }
-      },
+    const deleteChatButton = new Button({
+      text: "Удалить чат",
+      onClick: () => {},
     });
 
     const settingsButton = new Button({
-      text: "...",
+      text: settingsIcon,
       className: ["channel__header-tools-settings"],
       ariaLabel: "настройки чата",
       title: "настройки чата",
@@ -91,42 +91,6 @@ class ChannelWindow extends Block<ChannelWindowProps> {
       placeholder: "Ваше сообщение",
     });
 
-    const modalCloseButton_1 = new Button({
-      text: cancelIcon,
-      className: ["modal-close"],
-      ariaLabel: "Закрыть модально окно",
-      title: "Закрыть",
-      onClick: Modal.closeAllModals,
-    });
-
-    const modalCloseButton_2 = new Button({
-      text: cancelIcon,
-      className: ["modal-close"],
-      ariaLabel: "Закрыть модально окно",
-      title: "Закрыть",
-      onClick: Modal.closeAllModals,
-    });
-
-    const addUserButton = new Button({
-      text: "Добавить",
-      className: ["popup__button"],
-    });
-
-    const removeUserButton = new Button({
-      text: "Удалить",
-      className: ["popup__button"],
-    });
-
-    const addUserInput = new Input({
-      name: "channel-add-user",
-      className: ["popup__input"],
-    });
-
-    const removeUserInput = new Input({
-      name: "channel-remove-user",
-      className: ["popup__input"],
-    });
-
     const showAttach = new ShowAttach({
       onClick: () => {
         // очищаем поле формы
@@ -142,21 +106,18 @@ class ChannelWindow extends Block<ChannelWindowProps> {
       },
     });
 
+    const channelInfo = new ChannelInfo({ show: false, chat: this.props.chat });
+
     this.children = {
       backButton,
-      addToChatButton,
-      removeFromChatButton,
+      channelInfo,
+      chatUsersButton,
+      deleteChatButton,
       settingsButton,
       showAttach,
       submitButton,
       attachInput,
       areaInput,
-      modalCloseButton_1,
-      modalCloseButton_2,
-      addUserButton,
-      removeUserButton,
-      addUserInput,
-      removeUserInput,
     };
 
     this.events = {
@@ -210,7 +171,7 @@ class ChannelWindow extends Block<ChannelWindowProps> {
         const input = (formdata.get("message") as string).trim();
         const attach = (formdata.get("attach") as File).name;
 
-        const hasData = (input || attach) && this.props.id;
+        const hasData = (input || attach) && this.props.chat?.id;
         if (!hasData) {
           return;
         }
@@ -229,15 +190,15 @@ class ChannelWindow extends Block<ChannelWindowProps> {
 
         try {
           const msg = await ChannelAPI.newMessage(
-            this.props.id as number,
+            this.props.chat?.id as number,
             formdata,
           );
           message = msg.message;
         } catch (error) {
           message = {
             message: error as string,
-            username: "user",
-            avatar: "/static/avatars/1.svg",
+            username: getDisplayName(this.user),
+            avatar: getUserAvatar(this.user),
           };
         }
 
@@ -254,30 +215,42 @@ class ChannelWindow extends Block<ChannelWindowProps> {
     };
   }
 
-  protected componentDidMount() {
-    if (!this.props.id) {
-      return;
+  protected beforeCompile(): void {
+    this.chatsController = new ChatsController();
+    const chatId = this.props.chat?.id;
+    if (chatId) {
+      // просим контролер запросить список пользователей чата
+      this.chatsController.getChatUsers(chatId);
+
+      // получаем список пользователей чата из стора
+      const chatUsers = store.getState().chatUsers?.[chatId];
+      this.setSubTitle(chatUsers);
+
+      // подписка на стор: пользователи чата
+      this.unsubscribers.push(
+        store.subscribe({
+          action: (state) => {
+            const chatUsers = state.chatUsers?.[chatId];
+            this.setSubTitle(chatUsers);
+          },
+          observer: (state) => state.chatUsers?.[chatId],
+        }),
+      );
     }
+  }
 
-    ChannelAPI.getMessages(this.props.id).then((messages) => {
-      if (!messages) {
-        return;
-      }
+  protected componentDidMount(): void {
+    super.componentDidMount();
+    this.children.channelInfo.setProps({ chat: this.props.chat });
+  }
 
-      const container = this.getRef("messages") as HTMLDivElement;
-      const elements: HTMLElement[] = [];
-
-      messages.forEach((message) => {
-        const element = this.getMessageElement(message);
-        if (element) {
-          elements.push(element);
-        }
-      });
-
-      container.append(...elements);
-
-      this.scrollEnd(elements);
-    });
+  /**
+   * Подзаголовок чата
+   * @param chatUsers
+   */
+  protected setSubTitle(chatUsers: User[] = []) {
+    const subTitle = chatUsers?.map((user) => getDisplayName(user)).join(", ");
+    this.setProps({ subTitle });
   }
 
   private getFormAttachElement() {

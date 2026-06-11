@@ -40,6 +40,20 @@ abstract class Api {
     }
   }
 
+  protected async delete(
+    path: string = "",
+    options: HTTPTransportOptions = {},
+  ): Promise<Record<string, unknown>> {
+    try {
+      return (await this.transport.delete(path, options)) as Record<
+        string,
+        unknown
+      >;
+    } catch (e) {
+      return e as HTTPRequestRejected;
+    }
+  }
+
   protected async get(path: string = ""): Promise<Record<string, unknown>> {
     try {
       return (await this.transport.get(path)) as Record<string, unknown>;

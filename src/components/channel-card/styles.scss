@@ -10,6 +10,10 @@
     background-color: var(--background-color-accent);
   }
 
+  &:hover {
+    background-color: var(--background-color-forms);
+  }
+
   &__container {
     padding-block: var(--gap-small);
     display: flex;

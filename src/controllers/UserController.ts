@@ -79,6 +79,23 @@ class UserController extends Controller {
       user: response,
     });
   }
+
+  public async userSearch(requestId: number, input: string) {
+    const newInput = input.trim();
+
+    let usersList: Record<string, unknown>[] = [];
+
+    if (newInput) {
+      const data = { login: input.trim() };
+      const response = await userApi.search(data);
+
+      if (Array.isArray(response)) {
+        usersList = response;
+      }
+    }
+
+    store.setStateByPath("data.userSearch", { requestId, users: usersList });
+  }
 }
 
 export default UserController;

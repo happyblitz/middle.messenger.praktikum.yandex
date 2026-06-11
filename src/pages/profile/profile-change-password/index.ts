@@ -1,11 +1,11 @@
 import FormBlock from "../../../core/FormBlock";
-import Button from "../../button";
-import Input from "../../input-field";
-import Avatar from "../../avatar";
+import Button from "../../../components/button";
+import Input from "../../../components/input-field";
+import Avatar from "../../../components/avatar";
 import type { User } from "../../../core/Store";
 import { isSubmitRelatedTarget } from "../../../utils/Dom";
 import hbs from "./template.hbs?raw";
-import InfoMessage from "../../info-message";
+import InfoMessage from "../../../components/info-message";
 import UserController from "../../../controllers/UserController";
 import store from "../../../core/Store";
 
@@ -102,11 +102,11 @@ class ProfileChangePassword extends FormBlock<ProfileChangePasswordProps> {
   protected componentDidMount(): void {
     this.controller = new UserController();
 
-    this.formErrorListener(
-      "changePassword",
-      this.children.saveButton as Button,
-      this.children.formInfo as InfoMessage,
-    );
+    this.formErrorListener({
+      formKey: "changePassword",
+      submitBtn: this.children.saveButton as Button,
+      formInfo: this.children.formInfo as InfoMessage,
+    });
 
     this.unsubscribers.push(
       store.subscribe({

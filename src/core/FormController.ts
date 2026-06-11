@@ -28,7 +28,7 @@ class FormController extends Controller {
     // validate "password-confirm" field
     const passwordConfirm = formData.get("password-confirm");
     if (passwordConfirm !== null) {
-      const errorText = FormValidator.validateConPassField(
+      const errorText = FormValidator.validateConfirmField(
         data["password"],
         passwordConfirm as string,
       );

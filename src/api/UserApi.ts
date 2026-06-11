@@ -17,9 +17,9 @@ class UserApi extends Api {
     return this.put("/password", { data });
   }
 
-  // search() {
-  //   return this.post("/search");
-  // }
+  search(data: { login: string }) {
+    return this.post("/search", { data });
+  }
 }
 
 const userApi = new UserApi();

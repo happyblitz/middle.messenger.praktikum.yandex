@@ -11,7 +11,7 @@ import { isEventInForm } from "../utils/Dom";
 
 // Строгий интерфейс для компонента-поля формы
 interface FormComponent extends Block<object> {
-  getFormElementInfo: () => { name: string; type: string };
+  getFormElementInfo: () => { formName?: string; name: string; type: string };
   getFormElementValue: () => string;
   setFormElementError: (error: string) => void;
 }
@@ -35,12 +35,18 @@ type FormErrorListener = {
   formKey: keyof FormErrorState;
   submitBtn?: Button | null;
   formInfo?: InfoMessage | null;
+  formName?: string;
 };
+
+type registeredFields = Record<
+  string,
+  Record<string, { type: string; component: FormComponent }>
+>;
 
 abstract class FormBlock<Props extends object> extends Block<Props> {
   controller: Controller | null = null;
-  registeredFields: Record<string, { type: string; component: FormComponent }> =
-    {};
+  registeredFields: registeredFields = {};
+  defaultFormName: string = "form";
 
   /**
    * регистрируем все элементы формы
@@ -54,8 +60,21 @@ abstract class FormBlock<Props extends object> extends Block<Props> {
    * и при размонтировании по этой ссылке искать FormBlock
    */
   protected componentDidMount(): void {
-    this.registeredFields = Object.fromEntries(
-      this.collectFormElements(this.children),
+    const formElements = this.collectFormElements(this.children);
+
+    this.registeredFields = formElements.reduce(
+      (acc: registeredFields, value) => {
+        const [formName, elementName, element] = value;
+
+        if (!acc[formName]) {
+          acc[formName] = {};
+        }
+
+        acc[formName][elementName] = element;
+
+        return acc;
+      },
+      {},
     );
 
     super.componentDidMount();
@@ -74,12 +93,20 @@ abstract class FormBlock<Props extends object> extends Block<Props> {
   protected destroy() {}
 
   protected collectFormElements(children: Record<string, Block<object>>) {
-    let elements: [string, { type: string; component: FormComponent }][] = [];
+    const elements: [
+      string,
+      string,
+      { type: string; component: FormComponent },
+    ][] = [];
     for (const child of Object.values(children)) {
       // добавляем сам элемент
       if (isFormComponent(child)) {
-        const { name, type } = child.getFormElementInfo();
-        elements.push([name, { type, component: child }]);
+        const {
+          formName = this.defaultFormName,
+          name,
+          type,
+        } = child.getFormElementInfo();
+        elements.push([formName, name, { type, component: child }]);
       }
 
       // рекурсивно обходим дочерние элементы этого элемента
@@ -98,15 +125,17 @@ abstract class FormBlock<Props extends object> extends Block<Props> {
    * @param strict Валидировать пустое поле или нет
    * @return boolean
    */
-  protected formValidate(options: ValidateArgs = {}): boolean {
+  protected formValidate(
+    options: ValidateArgs = {},
+    form = this.defaultFormName,
+  ): boolean {
     const { fieldName = "", setError = true, strict = true } = options;
-
     // получаем значения всех зарегистрированных элементов формы
     const fields: FormFields = {};
-    for (const key of Object.keys(this.registeredFields)) {
+    for (const key of Object.keys(this.registeredFields[form])) {
       fields[key] = {
-        type: this.registeredFields[key].type,
-        value: this.registeredFields[key].component.getFormElementValue(),
+        type: this.registeredFields[form][key].type,
+        value: this.registeredFields[form][key].component.getFormElementValue(),
       };
     }
 
@@ -117,13 +146,15 @@ abstract class FormBlock<Props extends object> extends Block<Props> {
     if (setError) {
       if (fieldName) {
         const errorText = errors[fieldName] ?? "";
-        this.registeredFields[fieldName].component.setFormElementError(
+        this.registeredFields[form][fieldName].component.setFormElementError(
           errorText,
         );
       } else {
         Object.keys(fields).forEach((field) => {
           const errorText = errors[field] ?? "";
-          this.registeredFields[field].component.setFormElementError(errorText);
+          this.registeredFields[form][field].component.setFormElementError(
+            errorText,
+          );
         });
       }
     }
@@ -136,7 +167,12 @@ abstract class FormBlock<Props extends object> extends Block<Props> {
    * @param storeErrorKey
    */
   protected formErrorListener(params: FormErrorListener) {
-    const { formKey, submitBtn = null, formInfo = null } = params;
+    const {
+      formName = this.defaultFormName,
+      formKey,
+      submitBtn = null,
+      formInfo = null,
+    } = params;
 
     const unsibscribe = store.subscribe({
       action: (state) => {
@@ -152,7 +188,7 @@ abstract class FormBlock<Props extends object> extends Block<Props> {
         // ошибки валидации полей
         if (state.errors?.form?.[formKey]?.fields) {
           const errors = state.errors.form[formKey].fields;
-          this.fieldsSetErrors(errors);
+          this.fieldsSetErrors(errors, formName);
           store.setStateByPath(`errors.form.${formKey}.fields`, null);
         }
 
@@ -170,12 +206,17 @@ abstract class FormBlock<Props extends object> extends Block<Props> {
   }
 
   /**
-   * Выставляет ошибки в input поля формы
+   * Выставляет ошибки в поля формы
    * @param errors
    */
-  protected fieldsSetErrors(errors: Record<string, string>) {
+  protected fieldsSetErrors(
+    errors: Record<string, string>,
+    form = this.defaultFormName,
+  ) {
     Object.entries(errors).forEach(([fieldName, errorText]) => {
-      this.registeredFields[fieldName].component.setFormElementError(errorText);
+      this.registeredFields[form][fieldName].component.setFormElementError(
+        errorText,
+      );
     });
   }
 
@@ -192,7 +233,7 @@ abstract class FormBlock<Props extends object> extends Block<Props> {
    * Собрать данные формы
    * @returns FormData instance
    */
-  protected getFormData(formRef = "form") {
+  protected getFormData(formRef = this.defaultFormName) {
     const form = this.getRef(formRef) as HTMLFormElement;
     return new FormData(form);
   }
@@ -200,17 +241,17 @@ abstract class FormBlock<Props extends object> extends Block<Props> {
   /**
    * Проверяет что все поля формы заполнены
    */
-  protected allFieldsFilled() {
+  protected allFieldsFilled(form = this.defaultFormName) {
     const fields: Record<string, string> = {};
-    for (const fieldName of Object.keys(this.registeredFields)) {
+    for (const fieldName of Object.keys(this.registeredFields[form])) {
       fields[fieldName] =
-        this.registeredFields[fieldName].component.getFormElementValue();
+        this.registeredFields[form][fieldName].component.getFormElementValue();
     }
 
     return FormValidator.allFieldsFilled(fields);
   }
 
-  protected isFormEvent(event: Event, formRef = "form") {
+  protected isFormEvent(event: Event, formRef = this.defaultFormName) {
     const form = this.getRef(formRef);
     return isEventInForm(event, form);
   }

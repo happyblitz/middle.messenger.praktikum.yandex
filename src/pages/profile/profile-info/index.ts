@@ -1,6 +1,6 @@
 import Block from "../../../core/Block";
-import Button from "../../button";
-import Avatar from "../../avatar";
+import Button from "../../../components/button";
+import Avatar from "../../../components/avatar";
 import type { User } from "../../../core/Store";
 import hbs from "./template.hbs?raw";
 import AuthController from "../../../controllers/AuthController";

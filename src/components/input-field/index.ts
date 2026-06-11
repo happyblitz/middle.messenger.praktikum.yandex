@@ -3,9 +3,9 @@ import hbs from "./template.hbs?raw";
 import InfoMessage from "../info-message";
 
 type InputProps = {
+  name: string;
   label?: string;
   labelClassName?: string[];
-  name: string;
   type?: string;
   value?: string;
   autocomplete?: string;
@@ -14,8 +14,10 @@ type InputProps = {
   errorText?: string;
   id?: string;
   accept?: string;
+  formName?: string;
   onFocusout?: ((e: Event) => void) | (() => void);
   onChange?: ((e: Event) => void) | (() => void);
+  onInput?: ((e: Event) => void) | (() => void);
 };
 
 class Input extends Block<InputProps> {
@@ -31,6 +33,7 @@ class Input extends Block<InputProps> {
     this.events = {
       focusout: this.props.onFocusout,
       change: this.props.onChange,
+      input: this.props.onInput,
     };
   }
 
@@ -53,6 +56,7 @@ class Input extends Block<InputProps> {
 
   public getFormElementInfo() {
     return {
+      ...(this.props.formName ? { formName: this.props.formName } : null),
       name: this.props.name,
       type: this.props.type ?? "text",
     };

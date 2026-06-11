@@ -34,7 +34,7 @@ type HTTPHeaders = Record<string, string>;
 
 type RequestOptions = {
   method: string;
-  data?: Record<string, string> | FormData;
+  data?: Record<string, unknown> | FormData;
   headers?: HTTPHeaders;
   responseType?: XMLHttpRequestResponseType;
   timeout?: number;
@@ -115,7 +115,9 @@ class HTTPTransport {
 
       xhr.open(
         method,
-        isGet && data ? `${requestUrl}${queryStringify(data)}` : requestUrl,
+        isGet && data
+          ? `${requestUrl}${queryStringify(data as Record<string, string>)}`
+          : requestUrl,
       );
 
       if (responseType) {
@@ -139,7 +141,7 @@ class HTTPTransport {
             } else {
               response = xhr.responseText;
             }
-          } catch (e) {
+          } catch {
             response = xhr.responseText;
           }
         }

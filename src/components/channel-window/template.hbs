@@ -1,19 +1,23 @@
 <div class="channel">
-  {{#if id}}
+  {{#if chat.id}}
   <header class="channel__header static-header">
     <div class="channel__header-meta">
       {{{backButton}}}
-      <div class="channel__header-title">{{username}}</div>
+      <div class="channel__header-title">
+        <div>{{chat.title}}</div>
+        <div>{{subTitle}}</div>
+      </div>
     </div>
     <div class="channel__header-tools">
       <div class="channel__header-tools-control">
         <div class="channel__header-tools-control-inner">
           <h2>Управление чатом</h2>
-          {{{addToChatButton}}} {{{removeFromChatButton}}}
+          {{{chatUsersButton}}} {{{deleteChatButton}}}
         </div>
       </div>
       {{{settingsButton}}}
     </div>
+    {{{channelInfo}}}
   </header>
   <div class="channel__window" ref="messages-container">
     <div class="channel__window-wrapper" ref="messages"></div>
@@ -34,24 +38,6 @@
       {{{areaInput}}} {{{submitButton}}}
     </form>
   </footer>
-  <div class="absolute-box popup" ref="addUserModal" data-js-modal>
-    {{{modalCloseButton_1}}}
-    <div class="popup__adduser">
-      <h3 class="popup__title">Добавить пользователя</h3>
-      <form action="" class="popup__form">
-        {{{addUserInput}}} {{{addUserButton}}}
-      </form>
-    </div>
-  </div>
-  <div class="absolute-box popup" ref="removeUserModal" data-js-modal>
-    {{{modalCloseButton_2}}}
-    <div class="popup__removeuser">
-      <h3 class="popup__title">Удалить пользователя</h3>
-      <form action="" class="popup__form">
-        {{{removeUserInput}}} {{{removeUserButton}}}
-      </form>
-    </div>
-  </div>
   {{else}}
   <div class="channel__no-active">
     <p>Выберите чат, чтобы начать общаться</p>

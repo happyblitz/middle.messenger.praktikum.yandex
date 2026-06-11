@@ -10,7 +10,7 @@ class RegisterPage extends FormBlock<object> {
   template = hbs;
 
   constructor() {
-    super({ sign_in: "/login" });
+    super({ sign_in: "/sign-in" });
 
     const emailInput = new Input({
       type: "email",

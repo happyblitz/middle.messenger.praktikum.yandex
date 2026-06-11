@@ -9,7 +9,7 @@ class LoginPage extends FormBlock<object> {
   template = hbs;
 
   constructor() {
-    super({ sign_up: "/register" });
+    super({ sign_up: "/sign-up" });
 
     const loginInput = new Input({
       name: "login",

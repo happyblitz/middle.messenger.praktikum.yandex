@@ -9,8 +9,13 @@
 
   &__header {
     @include flex-center;
+    @include switch-user-select;
 
     flex-direction: column;
+  }
+
+  &__username {
+    @include switch-user-select(true);
   }
 
   &__main {
