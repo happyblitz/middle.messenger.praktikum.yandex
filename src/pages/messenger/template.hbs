@@ -7,6 +7,7 @@
       <header class="messenger__header static-header">
         {{{menuButton}}} {{{searchInput}}}
       </header>
+      {{{newChannelButton}}}
       <div class="messenger__channels">
         <nav class="channels">
           <ul class="channels__list" ref="channelList"></ul>
@@ -15,7 +16,5 @@
     </aside>
     <main class="messenger__main">{{{channelWindow}}}</main>
   </div>
-  <div class="fixed-box modal-closed" ref="profile">{{{profile}}}</div>
+  {{{newChannelModal}}}
 </div>
-
-{{!-- {{{profile__edit}}}{{{profile__password}}} --}}

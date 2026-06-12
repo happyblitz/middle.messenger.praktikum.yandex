@@ -18,7 +18,7 @@ class Button extends Block<ButtonProps> {
     super(props);
 
     this.events = {
-      click: this.props.onClick,
+      click: (e) => this.props.onClick?.(e),
     };
   }
 }

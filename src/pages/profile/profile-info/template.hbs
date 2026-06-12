@@ -1,0 +1,35 @@
+<div>
+  <div class="profile__header">
+    {{{avatarImg}}}
+    <h2 class="h2 profile__username">{{user.display_name}}</h2>
+  </div>
+  <div class="profile__data">
+    <dl class="profile__data-container">
+      <dt class="profile__data-term">Почта</dt>
+      <dd class="profile__data-value">{{user.email}}</dd>
+    </dl>
+    <dl class="profile__data-container">
+      <dt class="profile__data-term">Логин</dt>
+      <dd class="profile__data-value">{{user.login}}</dd>
+    </dl>
+    <dl class="profile__data-container">
+      <dt class="profile__data-term">Имя</dt>
+      <dd class="profile__data-value">{{user.first_name}}</dd>
+    </dl>
+    <dl class="profile__data-container">
+      <dt class="profile__data-term">Фамилия</dt>
+      <dd class="profile__data-value">{{user.second_name}}</dd>
+    </dl>
+    <dl class="profile__data-container">
+      <dt class="profile__data-term">Имя в чатах</dt>
+      <dd class="profile__data-value">{{user.display_name}}</dd>
+    </dl>
+    <dl class="profile__data-container">
+      <dt class="profile__data-term">Телефон</dt>
+      <dd class="profile__data-value">{{user.phone}}</dd>
+    </dl>
+  </div>
+  <div class="profile__controls">
+    {{{editProfileButton}}}{{{newPasswordButton}}}{{{logoutButton}}}
+  </div>
+</div>

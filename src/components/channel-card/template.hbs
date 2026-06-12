@@ -1,19 +1,21 @@
 <div
   class="channel-card {{#if isActive}}isActive{{/if}}"
-  data-channel-id="{{id}}"
+  data-channel-id="{{chat.id}}"
 >
   <div class="channel-card__container">
     {{{avatar}}}
     <div class="channel-card__content">
       <div class="channel-card__header">
-        <div class="channel-card__user">{{username}}</div>
-        <div class="channel-card__date">{{date}}</div>
+        <div class="channel-card__user">{{chat.title}}</div>
+        <div class="channel-card__date">{{formats.date}}</div>
       </div>
       <div class="channel-card__body">
-        <div class="channel-card__last-message">{{last_message}}</div>
-        {{#if new_messages}}
+        <div class="channel-card__last-message">{{chat.last_message}}</div>
+        {{#if chat.unread_count}}
         <div class="channel-card__new-messages colored-border">
-          <span class="channel-card__new-messages-count">{{new_messages}}</span>
+          <span class="channel-card__new-messages-count"
+            >{{chat.unread_count}}</span
+          >
         </div>
         {{/if}}
       </div>

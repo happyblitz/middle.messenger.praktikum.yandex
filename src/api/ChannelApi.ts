@@ -1,14 +1,13 @@
-import updChannels from "./static-data/channels_static";
 import messages from "./static-data/messages_static";
-import type { Channel } from "./static-data/channels_static";
 import type { Message } from "./static-data/messages_static";
 import { toBase64 } from "../utils/Globals";
+import { getDisplayName, getUserAvatar } from "../utils/Globals";
+import store, { type User } from "../core/Store";
 
+/**
+ * Заглушка на время. Аля отправляем сообщение
+ */
 class ChannelAPI {
-  public static async getChannels(): Promise<Channel[]> {
-    return updChannels;
-  }
-
   public static async getMessages(chatId: number): Promise<Message[]> {
     if (chatId === 1) {
       return messages;
@@ -22,13 +21,14 @@ class ChannelAPI {
     formdata: FormData,
   ): Promise<{ channelId: number; message: Message }> {
     const file = await toBase64(formdata.get("attach") as File);
+    const user = store.getState().user as User;
     return {
       channelId,
       message: {
         message: (formdata.get("message") as string).trim(),
-        username: "User",
+        username: getDisplayName(user),
         ...(file && { image: file }),
-        avatar: "/static/avatars/user.svg",
+        avatar: getUserAvatar(user),
       },
     };
   }

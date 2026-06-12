@@ -70,3 +70,25 @@
     display: none; // For Chrome, Safari, and Edge
   }
 }
+
+@mixin switch-user-select($select: false) {
+  @if $select {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+  } @else {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+}
+
+@mixin olive-btn {
+  background-color: var(--background-color-olive);
+
+  &:hover {
+    box-shadow: 0 0 12px var(--color-shadow);
+  }
+}

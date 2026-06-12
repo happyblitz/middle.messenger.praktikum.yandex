@@ -1,6 +1,6 @@
 import Block from "../../../core/Block";
 import Button from "../../button";
-import cancelIcon from "../close.svg?raw";
+import cancelIcon from "../../../resources/icons/close.svg?raw";
 import hbs from "./template.hbs?raw";
 
 type ShowAttachProps = {

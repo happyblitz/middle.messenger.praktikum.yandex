@@ -95,3 +95,36 @@
     --inner-bg-color: var(--background-color-primary);
   }
 }
+
+.error-message,
+.success-message {
+  font-size: rem(14);
+  font-weight: normal;
+  letter-spacing: rem(0.3);
+}
+
+.error-message {
+  color: var(--color-warning);
+}
+
+.success-message {
+  @include abs-center;
+
+  color: var(--color-success);
+  animation: quick-hide 0.5s ease-out 2s forwards;
+}
+
+@keyframes quick-hide {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.center {
+  text-align: center;
+}
+
+.relative {
+  position: relative;
+}

@@ -1,0 +1,23 @@
+<div class="block-root">
+  {{#if show}}
+  <div class="absolute-box popup">
+    {{{modalCloseButton}}}
+    <div class="popup__body">
+      <div class="channel-info">
+        <h3 class="popup__title">{{#if chat.id}}Пользователи чата{{/if}}</h3>
+        <form action="" class="popup__form" ref="form">
+          <div class="popup__form-data">
+            <div class="user-search">
+              <div>{{{userSearch}}}</div>
+              <div>{{{usersList}}}</div>
+              <div>{{{usersListSelected}}}</div>
+            </div>
+            {{{formInfo}}}
+          </div>
+          {{{submitButton}}}
+        </form>
+      </div>
+    </div>
+  </div>
+  {{/if}}
+</div>

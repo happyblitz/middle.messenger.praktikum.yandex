@@ -1,0 +1,18 @@
+<div>
+  <div class="profile__header">
+    <form action="" class="edit-logo__form" ref="avatar-form">
+      {{{avatarInput}}}
+      <label for="edit-logo-attach">{{{avatarImg}}}</label>
+    </form>
+    {{{formAvatarInfo}}}
+    <h2 class="h2 profile__username">{{user.display_name}}</h2>
+  </div>
+  <form class="contents" action="" ref="form">
+    <div class="profile__data">
+      {{{emailInput}}} {{{loginInput}}} {{{firstNameInput}}}
+      {{{secondNameInput}}} {{{displayNameInput}}} {{{phoneInput}}}
+      <div class="relative">{{{formInfo}}}</div>
+    </div>
+    <div class="profile__controls">{{{saveButton}}}</div>
+  </form>
+</div>

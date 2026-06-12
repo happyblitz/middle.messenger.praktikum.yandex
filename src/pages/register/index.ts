@@ -1,16 +1,16 @@
-import Block from "../../core/Block";
-import type { SyncInputsArgs } from "../../core/Block";
+import FormBlock from "../../core/FormBlock";
+import AuthController from "../../controllers/AuthController";
 import Input from "../../components/input-field";
+import InfoMessage from "../../components/info-message";
 import Button from "../../components/button";
-import FormValidator from "../../utils/FormValidator";
-import { isEventInForm, isSubmitRelatedTarget } from "../../utils/Dom";
+import { isSubmitRelatedTarget } from "../../utils/Dom";
 import hbs from "./template.hbs?raw";
 
-class RegisterPage extends Block<object> {
+class RegisterPage extends FormBlock<object> {
   template = hbs;
 
   constructor() {
-    super({ sign_in: "/login" });
+    super({ sign_in: "/sign-in" });
 
     const emailInput = new Input({
       type: "email",
@@ -53,10 +53,12 @@ class RegisterPage extends Block<object> {
 
     const confirmPasswordInput = new Input({
       type: "password",
-      name: "password-confirm",
-      placeholder: "Пароль",
+      name: "password_confirm",
+      placeholder: "Пароль еще раз",
       autocomplete: "off",
     });
+
+    const formError = new InfoMessage();
 
     const submitButton = new Button({
       type: "submit",
@@ -73,95 +75,58 @@ class RegisterPage extends Block<object> {
       phoneInput,
       passwordInput,
       confirmPasswordInput,
+      formError,
       submitButton,
     };
 
     this.events = {
       focusout: (event: Event) => {
-        const form = this.getRef("form");
-        if (isEventInForm(event, form)) {
+        if (this.isFormEvent(event)) {
           const input = event.target as HTMLInputElement;
 
           // Фокус перешёл на кнопку submit текущей формы
           // Проверкой займется submit формы
-          if (isSubmitRelatedTarget(event as FocusEvent, form)) {
+          if (isSubmitRelatedTarget(event as FocusEvent, this.getRef("form"))) {
             return;
           }
 
-          this.syncInputsState({ inputName: input.name, strict: false });
+          this.formValidate({ fieldName: input.name, strict: false });
         }
       },
       input: (event: Event) => {
-        const form = this.getRef("form");
-        if (isEventInForm(event, form)) {
-          const submitButton = this.children.submitButton.getRef(
-            "button",
-          ) as HTMLButtonElement;
-
-          submitButton.disabled = !this.syncInputsState({ setProps: false });
+        if (this.isFormEvent(event)) {
+          const disabled = !this.formValidate({ setError: false });
+          this.children.submitButton.setProps({ disabled });
         }
       },
       submit: (event: Event) => {
-        const form = this.getRef("form");
-        if (isEventInForm(event, form)) {
+        if (this.isFormEvent(event)) {
           event.preventDefault();
 
-          const formIsValid = this.syncInputsState();
-
+          const formIsValid = this.formValidate();
           if (!formIsValid) {
             return;
           }
 
-          const form = this.getRef("form") as HTMLFormElement;
-          const formdata = new FormData(form);
+          this.children.submitButton.setProps({ disabled: true });
 
-          console.log("formdata => ", formdata);
-          formdata.forEach((value, key) => {
-            console.log(`Поле: ${key}, значение ${value}`);
-          });
+          if (this.controller instanceof AuthController) {
+            const formData = this.getFormData();
+            this.controller.newUser(formData);
+          }
         }
       },
     };
   }
 
-  protected syncInputsState(args: SyncInputsArgs = {}): boolean {
-    const { setProps = true, inputName = "", strict = true } = args;
-
-    // проверка полей, для которых указано regexp
-    let isValid = super.syncInputsState({ setProps, inputName, strict });
-
-    // требуется ли валидация поля password-confirm
-    const shouldValidateConPassInput =
-      !inputName || ["password", "password-confirm"].includes(inputName);
-
-    // проверка поля password-confirm
-    if (shouldValidateConPassInput) {
-      const passInput = this.children.passwordInput.getRef(
-        "input",
-      ) as HTMLInputElement;
-      const conPassInput = this.children.confirmPasswordInput.getRef(
-        "input",
-      ) as HTMLInputElement;
-
-      const errorText = FormValidator.validateConPassField(
-        passInput.value,
-        conPassInput.value,
-        strict,
-      );
-
-      if (errorText) {
-        isValid = false;
-      }
-
-      if (setProps) {
-        this.children.confirmPasswordInput.setProps({
-          errorText,
-          value: conPassInput.value,
-        });
-      }
-    }
-
-    return isValid;
+  protected componentDidMount(): void {
+    super.componentDidMount();
+    this.controller = new AuthController();
+    this.formErrorListener({
+      formKey: "register",
+      submitBtn: this.children.submitButton as Button,
+      formInfo: this.children.formError as InfoMessage,
+    });
   }
 }
 

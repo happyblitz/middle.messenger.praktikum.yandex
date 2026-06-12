@@ -1,7 +1,25 @@
 @use "../helpers" as *;
 
 .popup {
-  display: none;
+  @include switch-user-select;
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  label,
+  input {
+    @include switch-user-select(true);
+  }
+
+  min-width: rem(390);
+  width: min-content;
+
+  &.popup-hide {
+    display: none;
+  }
 
   & > div {
     padding: rem(35) rem(40);
@@ -23,14 +41,25 @@
     gap: rem(12);
   }
 
+  &__label {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    row-gap: var(--gap-small);
+    font-weight: 500;
+    color: var(--color-light2);
+  }
+
   &__input {
     width: 100%;
   }
 
   &__button {
+    @include olive-btn;
+
     width: 100%;
     padding: rem(4);
-    background-color: var(--color-warning);
+    margin-top: var(--gap);
   }
 
   &__adduser {

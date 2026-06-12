@@ -1,15 +1,15 @@
-import Block from "../../core/Block";
+import FormBlock from "../../core/FormBlock";
+import AuthController from "../../controllers/AuthController";
 import Input from "../../components/input-field";
 import Button from "../../components/button";
-import InputError from "../../components/input-error";
-import { isEventInForm } from "../../utils/Dom";
+import InfoMessage from "../../components/info-message";
 import hbs from "./template.hbs?raw";
 
-class LoginPage extends Block<object> {
+class LoginPage extends FormBlock<object> {
   template = hbs;
 
   constructor() {
-    super({ sign_up: "/register" });
+    super({ sign_up: "/sign-up" });
 
     const loginInput = new Input({
       name: "login",
@@ -31,7 +31,7 @@ class LoginPage extends Block<object> {
       disabled: true,
     });
 
-    const formError = new InputError();
+    const formError = new InfoMessage();
 
     this.children = {
       loginInput,
@@ -42,36 +42,35 @@ class LoginPage extends Block<object> {
 
     this.events = {
       input: (event) => {
-        const form = this.getRef("form");
-        if (isEventInForm(event, form)) {
-          const submitButton = this.children.submitButton.getRef(
-            "button",
-          ) as HTMLButtonElement;
-
-          submitButton.disabled = !this.syncInputsState({ setProps: false });
+        if (this.isFormEvent(event)) {
+          // проверяем только заполненность всех полей
+          const disabled = !this.allFieldsFilled();
+          this.children.submitButton.setProps({ disabled });
         }
       },
       submit: (event) => {
-        const form = this.getRef("form");
-        if (isEventInForm(event, form)) {
+        if (this.isFormEvent(event)) {
           event.preventDefault();
 
-          const formIsValid = this.syncInputsState();
+          this.children.submitButton.setProps({ disabled: true });
 
-          if (!formIsValid) {
-            return;
+          if (this.controller instanceof AuthController) {
+            const formData = this.getFormData();
+            this.controller.login(formData);
           }
-
-          const form = this.getRef("form") as HTMLFormElement;
-          const formdata = new FormData(form);
-
-          console.log("formdata => ", formdata);
-          formdata.forEach((value, key) => {
-            console.log(`Поле: ${key}, значение ${value}`);
-          });
         }
       },
     };
+  }
+
+  protected componentDidMount(): void {
+    super.componentDidMount();
+    this.controller = new AuthController();
+    this.formErrorListener({
+      formKey: "login",
+      submitBtn: this.children.submitButton as Button,
+      formInfo: this.children.formError as InfoMessage,
+    });
   }
 }
 

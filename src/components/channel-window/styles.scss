@@ -47,8 +47,15 @@
         @include square(var(--icon-block-width));
         @include flex-center;
 
-        transform: rotate(90deg);
         opacity: var(--opacity);
+
+        &:hover {
+          opacity: 1;
+        }
+
+        svg {
+          @include square(rem(20));
+        }
       }
 
       &-control {
@@ -99,6 +106,8 @@
   }
 
   &__window {
+    @include switch-user-select;
+
     flex-grow: 1;
     display: flex;
     align-items: safe flex-end;
@@ -191,6 +200,8 @@
   }
 
   &__message {
+    @include switch-user-select(true);
+
     display: flex;
     align-items: flex-end;
     gap: var(--gap-small);

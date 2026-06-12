@@ -55,10 +55,24 @@
     }
   }
 
+  &__new-channel {
+    margin-block: var(--gap);
+    margin-inline: var(--gap-small);
+    padding-block: rem(4);
+    background-color: var(--background-color-forms);
+    color: var(--color-light);
+
+    &:hover {
+      background-color: var(--background-color-accent);
+      box-shadow: 0 0 12px var(--color-shadow);
+    }
+  }
+
   &__channels {
     @include hidden-scroll;
+    @include switch-user-select;
 
-    margin-top: var(--gap);
+    margin-top: var(--gap-small);
   }
 
   &__burger-button {

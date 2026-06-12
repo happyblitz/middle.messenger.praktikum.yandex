@@ -1,0 +1,15 @@
+<div class="block-root">
+  {{#if show}}
+  <div class="absolute-box popup">
+    {{{modalCloseButton}}}
+    <div class="popup__body">
+      <div class="channel-info">
+        <h3 class="popup__title">Создать чат</h3>
+        <form action="" class="popup__form" ref="form">
+          {{{channelTitle}}} {{{formInfo}}} {{{submitButton}}}
+        </form>
+      </div>
+    </div>
+  </div>
+  {{/if}}
+</div>

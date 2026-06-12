@@ -2,19 +2,18 @@ import Block from "../../core/Block";
 import Input from "../../components/input-field";
 import Button from "../../components/button";
 import ChannelCard from "../../components/channel-card";
-import Profile from "../../components/profile";
 import ChannelWindow from "../../components/channel-window";
-import ChannelAPI from "../../api/ChannelApi";
+import NewChannel from "../../components/new-channel";
 import hbs from "./template.hbs?raw";
 import burderIcon from "./burger.svg?raw";
-import { cssModalClosedClass } from "../../utils/Globals";
-import Modal from "../../utils/Modal";
-import UserApi from "../../api/UserApi";
-
+import Router from "../../core/Router";
+import store from "../../core/Store";
+import type { Chat } from "../../core/Store";
 import "./styles.scss";
 
 type MessengerProps = {
   activeChatCard?: number | null;
+  chats?: Chat[];
 };
 
 class MessengerPage extends Block<MessengerProps> {
@@ -26,20 +25,13 @@ class MessengerPage extends Block<MessengerProps> {
       activeChatCard: null,
     });
 
-    const onDeepClose = () => {
-      this.children.profile.setProps({ page: "info" });
-      const profile = this.getRef("profile") as HTMLElement;
-      profile.classList.remove(cssModalClosedClass);
-    };
-
     const menuButton = new Button({
       text: burderIcon,
       className: ["messenger__burger-button"],
       ariaLabel: "Меню",
       title: "Меню",
       onClick: () => {
-        Modal.closeAllModals();
-        onDeepClose();
+        Router.getInstance().goto("/settings");
       },
     });
 
@@ -49,101 +41,75 @@ class MessengerPage extends Block<MessengerProps> {
       className: ["messenger__header-search"],
     });
 
+    const newChannelButton = new Button({
+      text: "Новый чат",
+      className: ["messenger__new-channel"],
+      onClick: () => {
+        this.children.newChannelModal.setProps({ show: true });
+      },
+    });
+
     const channelWindow = new ChannelWindow({
       onBack: this.showChannelsList.bind(this),
     });
 
-    const profile = new Profile({ page: "info", onDeepClose });
+    const newChannelModal = new NewChannel({
+      show: false,
+    });
 
     this.children = {
       menuButton,
       searchInput,
+      newChannelButton,
       channelWindow,
-      profile,
+      newChannelModal,
     };
   }
 
   protected componentDidMount() {
-    UserApi.getCurrentUser()
-      .then((user) => {
-        this.children.profile.setProps({ user });
-      })
-      .catch((error) => console.warn(error));
+    this.props.chats = store.getState().chats ?? [];
 
-    ChannelAPI.getChannels()
-      .then((channelListData) => {
-        if (!channelListData) {
-          return;
-        }
+    const container = this.getRef("channelList");
 
-        const container = this.getRef("channelList");
+    if (!container) {
+      return;
+    }
 
-        if (!container) {
-          return;
-        }
+    const elements: HTMLElement[] = [];
 
-        const elements: HTMLElement[] = [];
+    this.props.chats.forEach((chat) => {
+      const date = chat?.last_message?.time
+        ? new Intl.DateTimeFormat("ru-RU").format(
+            new Date(chat?.last_message?.time),
+          )
+        : "";
 
-        channelListData.forEach((channelData) => {
-          const channelCardProps = {
-            ...channelData,
-            last_message: channelData.last_message.slice(0, 80),
-            date: new Intl.DateTimeFormat("ru-RU").format(
-              new Date(channelData.timestamp),
-            ),
-            isActive: false,
-            onSelect: () => {
-              // same chat
-              if (this.props.activeChatCard === channelData.id) {
-                return;
-              }
+      const channelCardProps = {
+        chat,
+        formats: {
+          date,
+          last_message: chat?.last_message?.content.slice(0, 80) ?? "",
+        },
+        isActive: false,
+        onSelect: () => this.setActiveChat(chat),
+      };
 
-              // снимаем выделение со старого чата
-              if (this.props.activeChatCard) {
-                const oldCard = this.channelCards[this.props.activeChatCard];
-                if (oldCard) {
-                  oldCard.element()?.classList.toggle("isActive");
-                }
-              }
+      const li = document.createElement("li");
+      li.classList.add("channels__item");
 
-              // выделяем активный чат
-              const newCard = this.channelCards[channelData.id];
-              if (newCard) {
-                newCard.element()?.classList.toggle("isActive");
-              }
+      const channelCard = new ChannelCard(channelCardProps);
+      const element = channelCard.element();
 
-              // запоминаем новый активный чат
-              this.props.activeChatCard = channelData.id;
+      if (element) {
+        li.append(element);
+        elements.push(li);
+        this.channelCards[chat.id] = channelCard;
+      }
+    });
 
-              // скрываем список чата для мобильной версии
-              // отображаем только сам чат
-              this.showChannelsList();
+    container.append(...elements);
 
-              // перерисовываем окно чата
-              this.children.channelWindow.setProps({
-                id: channelData.id,
-                username: channelData.username,
-                onBack: this.showChannelsList.bind(this),
-              });
-            },
-          };
-
-          const li = document.createElement("li");
-          li.classList.add("channels__item");
-
-          const channelCard = new ChannelCard(channelCardProps);
-          const element = channelCard.element();
-
-          if (element) {
-            li.append(element);
-            elements.push(li);
-            this.channelCards[channelData.id] = channelCard;
-          }
-        });
-
-        container.append(...elements);
-      })
-      .catch((error) => console.warn(error));
+    this.setStoreListeners();
   }
 
   // вспомогательная функция
@@ -170,6 +136,75 @@ class MessengerPage extends Block<MessengerProps> {
     if (channelCard) {
       channelCard.element()?.classList.toggle("isActive");
     }
+  }
+
+  protected setStoreListeners() {
+    // слушаем изменение списка чатов
+    this.unsubscribers.push(
+      store.subscribe({
+        action: (state) => {
+          this.setProps({ chats: state.chats });
+        },
+        observer: (state) => state.chats,
+      }),
+    );
+
+    // если был создан новый чат, перейдем на него
+    this.unsubscribers.push(
+      store.subscribe({
+        action: (state) => {
+          const activeChatId = state.data?.newChatId;
+          if (activeChatId) {
+            const activeChat = this.props.chats?.find(
+              (c) => c.id === activeChatId,
+            );
+            if (activeChat) {
+              this.setActiveChat(activeChat);
+            }
+          }
+        },
+        observer: (state) => state.data?.newChatId,
+      }),
+    );
+  }
+
+  /**
+   * Переход на активный чат
+   * @param chat
+   * @returns
+   */
+  protected setActiveChat(chat: Chat) {
+    // same chat
+    if (this.props.activeChatCard === chat.id) {
+      return;
+    }
+
+    // снимаем выделение со старого чата
+    if (this.props.activeChatCard) {
+      const oldCard = this.channelCards[this.props.activeChatCard];
+      if (oldCard) {
+        oldCard.element()?.classList.toggle("isActive");
+      }
+    }
+
+    // выделяем активный чат
+    const newCard = this.channelCards[chat.id];
+    if (newCard) {
+      newCard.element()?.classList.toggle("isActive");
+    }
+
+    // запоминаем новый активный чат
+    this.props.activeChatCard = chat.id;
+
+    // скрываем список чата для мобильной версии
+    // отображаем только сам чат
+    this.showChannelsList();
+
+    // перерисовываем окно чата
+    this.children.channelWindow.setProps({
+      chat,
+      onBack: this.showChannelsList,
+    });
   }
 }
 
