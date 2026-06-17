@@ -50,7 +50,7 @@ class MessengerPage extends Block<MessengerProps> {
     });
 
     const channelWindow = new ChannelWindow({
-      onBack: this.showChannelsList.bind(this),
+      onBack: this.showChannelsList,
     });
 
     const newChannelModal = new NewChannel({
@@ -105,6 +105,8 @@ class MessengerPage extends Block<MessengerProps> {
         elements.push(li);
         this.channelCards[chat.id] = channelCard;
       }
+
+      this.setActiveChat();
     });
 
     container.append(...elements);
@@ -173,8 +175,25 @@ class MessengerPage extends Block<MessengerProps> {
    * @param chat
    * @returns
    */
-  protected setActiveChat(chat: Chat) {
-    // same chat
+  protected setActiveChat(chat: Chat | null = null) {
+    if (chat === null) {
+      if (this.props.activeChatCard) {
+        // если текущий чат был удален, пересоберм окно чата
+        const isChatWasDeleted = this.props.chats?.every(
+          ({ id }) => id !== this.props.activeChatCard,
+        );
+        if (isChatWasDeleted) {
+          this.props.activeChatCard = null;
+          this.children.channelWindow.setProps({
+            chat: null,
+          });
+        }
+      }
+
+      return;
+    }
+
+    // этот чат уже активный
     if (this.props.activeChatCard === chat.id) {
       return;
     }
@@ -205,6 +224,19 @@ class MessengerPage extends Block<MessengerProps> {
       chat,
       onBack: this.showChannelsList,
     });
+  }
+
+  /**
+   * сбрасывает активный чат
+   */
+  resetActiveChat() {
+    // перерисовываем окно чата
+    this.children.channelWindow.setProps({
+      chat: null,
+    });
+
+    // сбрасываем активный чат
+    this.props.activeChatCard = null;
   }
 }
 

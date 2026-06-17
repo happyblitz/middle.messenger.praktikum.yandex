@@ -4,6 +4,7 @@ import ChannelAPI from "../../api/ChannelApi";
 import type { Message } from "../../api/static-data/messages_static";
 import Input from "../input-field";
 import Button from "../button";
+import Text from "../text";
 import TextArea from "../textarea";
 import ChannelMessage from "./channel-message";
 import ShowAttach from "./show-attach";
@@ -16,7 +17,7 @@ import type { Chat } from "../../core/Store";
 import ChannelInfo from "../channel-info";
 import store from "../../core/Store";
 import type { User } from "../../core/Store";
-import ChatsController from "../../controllers/ChatsController";
+import ChatController from "../../controllers/ChatController";
 import { getDisplayName, getUserAvatar } from "../../utils/Globals";
 import "./styles.scss";
 
@@ -26,7 +27,6 @@ type ChannelWindowProps = {
   attachFieldName?: string;
   onBack: () => void;
   chatUsers?: User[];
-  subTitle?: string;
 };
 
 class ChannelWindow extends Block<ChannelWindowProps> {
@@ -36,7 +36,7 @@ class ChannelWindow extends Block<ChannelWindowProps> {
     "channel__footer-form-send",
     this.cssHideClassName,
   ];
-  chatsController: ChatsController | null = null;
+  chatController: ChatController | null = null;
   user: User = store.getState().user as User;
 
   constructor(props: ChannelWindowProps) {
@@ -57,16 +57,20 @@ class ChannelWindow extends Block<ChannelWindowProps> {
       },
     });
 
-    const deleteChatButton = new Button({
-      text: "Удалить чат",
-      onClick: () => {},
-    });
-
     const settingsButton = new Button({
       text: settingsIcon,
       className: ["channel__header-tools-settings"],
       ariaLabel: "настройки чата",
       title: "настройки чата",
+    });
+
+    const deleteChatButton = new Button({
+      text: "Удалить чат",
+      onClick: () => {
+        if (this.props?.chat?.id) {
+          this.chatController?.chatDelete(this.props.chat.id);
+        }
+      },
     });
 
     const submitButton = new Button({
@@ -91,6 +95,8 @@ class ChannelWindow extends Block<ChannelWindowProps> {
       placeholder: "Ваше сообщение",
     });
 
+    const subTitle = new Text({ text: "" });
+
     const showAttach = new ShowAttach({
       onClick: () => {
         // очищаем поле формы
@@ -111,6 +117,7 @@ class ChannelWindow extends Block<ChannelWindowProps> {
     this.children = {
       backButton,
       channelInfo,
+      subTitle,
       chatUsersButton,
       deleteChatButton,
       settingsButton,
@@ -216,22 +223,22 @@ class ChannelWindow extends Block<ChannelWindowProps> {
   }
 
   protected beforeCompile(): void {
-    this.chatsController = new ChatsController();
+    this.chatController = new ChatController();
     const chatId = this.props.chat?.id;
     if (chatId) {
       // просим контролер запросить список пользователей чата
-      this.chatsController.getChatUsers(chatId);
+      this.chatController.getChatUsers(chatId);
 
       // получаем список пользователей чата из стора
       const chatUsers = store.getState().chatUsers?.[chatId];
-      this.setSubTitle(chatUsers);
+      this.usersLoaded(chatUsers);
 
       // подписка на стор: пользователи чата
       this.unsubscribers.push(
         store.subscribe({
           action: (state) => {
             const chatUsers = state.chatUsers?.[chatId];
-            this.setSubTitle(chatUsers);
+            this.usersLoaded(chatUsers);
           },
           observer: (state) => state.chatUsers?.[chatId],
         }),
@@ -245,12 +252,31 @@ class ChannelWindow extends Block<ChannelWindowProps> {
   }
 
   /**
+   * Хук выполняемый после получения пользователей от стора
+   * @param chatUsers
+   */
+  protected usersLoaded(chatUsers: User[] = []) {
+    this.setSubTitle(chatUsers);
+
+    // если пользователь админ, разблокируем кнопку: удалить чат
+    let isAdmin = false;
+    for (const u of chatUsers) {
+      if (u.id === this.user.id) {
+        isAdmin = u.role === "admin";
+      }
+    }
+
+    this.children.deleteChatButton.setProps({ disabled: !isAdmin });
+  }
+
+  /**
    * Подзаголовок чата
    * @param chatUsers
    */
   protected setSubTitle(chatUsers: User[] = []) {
-    const subTitle = chatUsers?.map((user) => getDisplayName(user)).join(", ");
-    this.setProps({ subTitle });
+    const subTitle =
+      chatUsers?.map((user) => getDisplayName(user)).join(", ") ?? "";
+    this.children.subTitle.setProps({ text: subTitle });
   }
 
   private getFormAttachElement() {

@@ -2,7 +2,7 @@ import hbs from "./template.hbs?raw";
 import FormBlock from "../../core/FormBlock";
 import Input from "../input-field";
 import Button from "../button";
-import ChatsController from "../../controllers/ChatsController";
+import ChatController from "../../controllers/ChatController";
 import InfoMessage from "../info-message";
 import closeIcon from "../../resources/icons/close.svg?raw";
 
@@ -12,7 +12,7 @@ type NewChannelProps = {
 
 class NewChannel extends FormBlock<NewChannelProps> {
   template = hbs;
-  chatsController: ChatsController | null = null;
+  chatController: ChatController | null = null;
 
   constructor(props: NewChannelProps) {
     super(props);
@@ -59,10 +59,8 @@ class NewChannel extends FormBlock<NewChannelProps> {
             return;
           }
 
-          this.children.submitButton.setProps({ disabled: true });
-
           const formData = this.getFormData();
-          this.chatsController?.newChat(formData.get("channelTitle") as string);
+          this.chatController?.newChat(formData.get("channelTitle") as string);
           this.setProps({ show: false });
         }
       },
@@ -72,7 +70,7 @@ class NewChannel extends FormBlock<NewChannelProps> {
   protected componentDidMount(): void {
     super.componentDidMount();
 
-    this.chatsController = new ChatsController();
+    this.chatController = new ChatController();
 
     // сбрасываем значение ввода
     const input = this.children.channelTitle.getRef(

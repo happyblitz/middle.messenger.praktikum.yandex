@@ -1,6 +1,7 @@
 import isEqual from "../utils/functions/isEqual";
 import merge from "../utils/functions/merge";
 import set from "../utils/functions/set";
+import deleteDeep from "../utils/functions/deleteDeep";
 
 /**
  * результат сравнения Observer(текущий стор) vs Observer(новый стор)
@@ -39,6 +40,7 @@ export type StoreState = {
     getChats?: unknown;
     getChatUsers?: unknown;
     logout?: unknown;
+    deleteChat?: unknown;
   };
   response?: {
     form?: {
@@ -127,6 +129,17 @@ class Store {
    */
   public setStateByPath(path: string, value: unknown) {
     this.state = set(this.state, path, value) as StoreState;
+    // Уведомляем всех подписчиков об изменении
+    this.emit();
+  }
+
+  /**
+   * Удаляет элемент из стора
+   * @param path Путь к вложенному свойству
+   */
+  public deleteState(path: string) {
+    deleteDeep(this.state, path);
+
     // Уведомляем всех подписчиков об изменении
     this.emit();
   }

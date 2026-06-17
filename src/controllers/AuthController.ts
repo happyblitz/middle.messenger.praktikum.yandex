@@ -1,7 +1,7 @@
 import Controller from "../core/Controller";
 import store from "../core/Store";
 import authApi from "../api/AuthAPI";
-import ChatsController from "./ChatsController";
+import ChatController from "./ChatController";
 import FormValidator from "../utils/validation/FormValidator";
 
 class AuthController extends Controller {
@@ -71,8 +71,8 @@ class AuthController extends Controller {
   public async entryPoint() {
     const success = await this.getUserRequest();
     if (success) {
-      const chatsController = new ChatsController();
-      chatsController.chats();
+      const chatController = new ChatController();
+      chatController.chats();
     }
   }
 
