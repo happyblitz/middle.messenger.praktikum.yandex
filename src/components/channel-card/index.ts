@@ -9,6 +9,7 @@ type ChannelCardProps = {
   chat: Chat;
   formats: { date: string; last_message: string };
   onSelect: () => void;
+  isActive?: boolean;
 };
 
 class ChannelCard extends Block<ChannelCardProps> {

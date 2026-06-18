@@ -90,7 +90,7 @@ class MessengerPage extends Block<MessengerProps> {
           date,
           last_message: chat?.last_message?.content.slice(0, 80) ?? "",
         },
-        isActive: false,
+        isActive: this.props.activeChatCard === chat.id,
         onSelect: () => this.setActiveChat(chat),
       };
 
@@ -200,17 +200,11 @@ class MessengerPage extends Block<MessengerProps> {
 
     // снимаем выделение со старого чата
     if (this.props.activeChatCard) {
-      const oldCard = this.channelCards[this.props.activeChatCard];
-      if (oldCard) {
-        oldCard.element()?.classList.toggle("isActive");
-      }
+      this.toggleChannelCard(this.props.activeChatCard);
     }
 
     // выделяем активный чат
-    const newCard = this.channelCards[chat.id];
-    if (newCard) {
-      newCard.element()?.classList.toggle("isActive");
-    }
+    this.toggleChannelCard(chat.id);
 
     // запоминаем новый активный чат
     this.props.activeChatCard = chat.id;
