@@ -17,6 +17,7 @@ type ChannelMessageProps = {
   user?: User;
   image?: string | null;
   displayName?: string;
+  time?: string;
 };
 
 class ChannelMessage extends Block<ChannelMessageProps> {
@@ -41,6 +42,12 @@ class ChannelMessage extends Block<ChannelMessageProps> {
       this.props.message.type === "file"
         ? getFileUrl(this.props.message.file)
         : null;
+    this.props.time = Intl.DateTimeFormat("ru-RU", {
+      dateStyle: "short", // Adds DD.MM.YYYY
+      timeStyle: "short", // Adds HH:MM
+    })
+      .format(new Date(this.props.message.time))
+      .replace(",", "");
   }
 
   /**

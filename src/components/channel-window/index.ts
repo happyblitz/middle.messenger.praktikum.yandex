@@ -218,8 +218,13 @@ class ChannelWindow extends Block<ChannelWindowProps> {
     };
   }
 
-  protected beforeCompile(): void {
+  protected async componentDidMount() {
+    super.componentDidMount();
+
     this.chatController = new ChatController();
+
+    this.children.channelInfo.setProps({ chat: this.props.chat });
+
     const chatId = this.props.chat?.id;
     if (chatId) {
       // просим контролер запросить список пользователей чата
@@ -228,20 +233,20 @@ class ChannelWindow extends Block<ChannelWindowProps> {
       // получаем список пользователей чата из стора
       const chatUsers = store.getState().chatUsers?.[chatId];
       this.usersLoaded(chatUsers);
-    }
-  }
 
-  protected async componentDidMount() {
-    super.componentDidMount();
-    this.children.channelInfo.setProps({ chat: this.props.chat });
+      // подгружаем сообщения
+      const container = this.getMessagesContainer();
+      if (container) {
+        this.scrollHandler = () => {
+          if (this.isScrollNearTop() && !this.isLoadingMore) {
+            this.isLoadingMore = true;
+            this.scrollHeight = container.scrollHeight;
+            this.socketController!.getMessages();
+          }
+        };
 
-    const chatId = this.props.chat?.id;
-    if (chatId) {
-      this.resourceController = new ResourceController();
-
-      this.socketController = new ChatWebSocketController(chatId);
-      await this.socketController.init();
-      this.socketController.getMessages();
+        container.addEventListener("scroll", this.scrollHandler);
+      }
 
       // подписка на стор: новые сообщения
       this.unsubscribers.push(
@@ -264,6 +269,14 @@ class ChannelWindow extends Block<ChannelWindowProps> {
         }),
       );
 
+      this.resourceController = new ResourceController();
+
+      // делаем операцию с await последней,
+      // чтобы слушатели не пропустили расстылку стора
+      this.socketController = new ChatWebSocketController(chatId);
+      await this.socketController.init();
+      this.socketController.getMessages();
+
       // подписка на стор: файл загружен на сервер
       this.unsubscribers.push(
         store.subscribe({
@@ -284,20 +297,6 @@ class ChannelWindow extends Block<ChannelWindowProps> {
           observer: (state) => state.response?.uploadFiles,
         }),
       );
-
-      // подгружаем сообщения
-      const container = this.getMessagesContainer();
-      if (container) {
-        this.scrollHandler = () => {
-          if (this.isScrollNearTop() && !this.isLoadingMore) {
-            this.isLoadingMore = true;
-            this.scrollHeight = container.scrollHeight;
-            this.socketController!.getMessages();
-          }
-        };
-
-        container.addEventListener("scroll", this.scrollHandler);
-      }
     }
   }
 

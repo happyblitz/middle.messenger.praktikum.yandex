@@ -61,7 +61,7 @@ export type StoreState = {
   chatUsers?: ChatUsers;
 };
 
-export type ChatUsers = Record<string, User[]>;
+export type ChatUsers = Record<number, User[]>;
 
 export type User = {
   id: number;
