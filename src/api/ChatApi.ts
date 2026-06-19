@@ -52,6 +52,14 @@ class ChatApi extends Api {
   getUsers(id: number) {
     return this.get(`/${id}/users`);
   }
+
+  /**
+   * получить токен чата
+   * @param chatId
+   */
+  getToken(chatId: number) {
+    return this.post(`/token/${chatId}`);
+  }
 }
 
 const chatApi = new ChatApi();

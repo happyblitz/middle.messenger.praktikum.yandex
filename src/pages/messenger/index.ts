@@ -78,18 +78,8 @@ class MessengerPage extends Block<MessengerProps> {
     const elements: HTMLElement[] = [];
 
     this.props.chats.forEach((chat) => {
-      const date = chat?.last_message?.time
-        ? new Intl.DateTimeFormat("ru-RU").format(
-            new Date(chat?.last_message?.time),
-          )
-        : "";
-
       const channelCardProps = {
         chat,
-        formats: {
-          date,
-          last_message: chat?.last_message?.content.slice(0, 80) ?? "",
-        },
         isActive: this.props.activeChatCard === chat.id,
         onSelect: () => this.setActiveChat(chat),
       };

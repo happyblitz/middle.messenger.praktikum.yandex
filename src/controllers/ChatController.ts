@@ -194,8 +194,6 @@ class ChatController extends Controller {
   public async chatDelete(chatId: number) {
     const response = await chatApi.deleteChat(chatId);
 
-    console.log(response);
-
     if (response?.reason) {
       store.setState({
         errors: { deleteChat: response },

@@ -33,6 +33,7 @@ type FormErrors = {
 export type StoreState = {
   isAuthorized: boolean;
   chats: Chat[];
+  messages: Record<number, Message[]>;
   user: User | null;
   errors?: {
     form?: FormErrorState;
@@ -41,11 +42,14 @@ export type StoreState = {
     getChatUsers?: unknown;
     logout?: unknown;
     deleteChat?: unknown;
+    uploadFiles?: Record<string, unknown>;
+    webSocket?: Record<number, unknown>;
   };
   response?: {
     form?: {
       changePassword?: unknown;
     };
+    uploadFiles?: Record<string, UploadFile>;
   };
   data?: {
     userSearch?: {
@@ -84,6 +88,27 @@ export type Chat = {
   };
 };
 
+export type Message = {
+  content: string;
+  type: string;
+  time: string;
+  user_id: number;
+  id: number;
+  file?: UploadFile;
+  is_read?: boolean;
+  chat_id: number;
+};
+
+export type UploadFile = {
+  id: number;
+  user_id: number;
+  path: string;
+  filename: string;
+  content_type: string;
+  content_size: number;
+  upload_date: string;
+};
+
 export type FormErrorState = Partial<
   Record<
     | "register"
@@ -97,7 +122,12 @@ export type FormErrorState = Partial<
 >;
 
 class Store {
-  private state: StoreState = { isAuthorized: false, chats: [], user: null };
+  private state: StoreState = {
+    isAuthorized: false,
+    chats: [],
+    user: null,
+    messages: {},
+  };
   private listeners: listeners = new Set();
 
   public getState() {
@@ -166,6 +196,8 @@ class Store {
         listener.action(this.state);
       }
     });
+
+    console.log("emit", this.state);
   }
 }
 
