@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "vite",
+    "test": "vitest run",
     "test:run": "vitest run",
     "typecheck": "tsc --noEmit",
     "lint:js": "eslint .",
@@ -15,11 +16,14 @@
     "lint": "npm run lint:js && npm run lint:css && npm run typecheck",
     "build": "npm run typecheck && vite build",
     "preview": "vite preview --port 3000",
-    "start": "npm run build && npm run preview"
+    "start": "npm run build && npm run preview",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "eslint": "^10.4.0",
+    "husky": "^9.1.7",
+    "jest": "npm:empty-npm-package@^1.0.0",
     "jsdom": "^29.1.1",
     "sass": "^1.99.0",
     "stylelint": "^17.11.1",
@@ -27,8 +31,7 @@
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.59.3",
     "vite": "^8.0.10",
-    "vitest": "^4.1.9",
-    "jest": "npm:empty-npm-package@^1.0.0"
+    "vitest": "^4.1.9"
   },
   "dependencies": {
     "handlebars": "^4.7.9"
