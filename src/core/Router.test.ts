@@ -74,7 +74,7 @@ describe("Роутер", () => {
   });
 
   afterEach(() => {
-    // @ts-ignore
+    // @ts-expect-error Type 'undefined' is not assignable to type 'Router'
     Router.__instance = undefined;
     route = null;
     document.body.innerHTML = "";

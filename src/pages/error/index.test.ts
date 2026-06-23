@@ -5,7 +5,7 @@ describe("Компонент ErrorPage", () => {
   describe("Проверка передачи свойств", () => {
     const code = "1000";
     const code_message = "test code message";
-    // @ts-ignore
+
     const block = new ErrorPage({
       code,
       code_message,

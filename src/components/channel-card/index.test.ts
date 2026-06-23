@@ -46,7 +46,6 @@ describe("Компонент ChannelCard", () => {
   });
 
   describe("Обновление компонентов произошло", () => {
-    // @ts-ignore
     let saveCallback;
 
     vi.spyOn(store, "subscribe").mockImplementation((callback) => {
@@ -60,10 +59,9 @@ describe("Компонент ChannelCard", () => {
         avatar: "/some.img",
       };
 
-      // @ts-ignore
-      saveCallback.action({ chats: [updatedAvatar] });
+      saveCallback!.action({ chats: [updatedAvatar] });
 
-      // @ts-ignore
+      // @ts-expect-error доступ к приватному свойству
       expect(block.children.avatar["props"]["src"]).toContain("some.img");
     });
 
@@ -73,8 +71,7 @@ describe("Компонент ChannelCard", () => {
         title: "new title",
       };
 
-      // @ts-ignore
-      saveCallback.action({ chats: [updatedTitle] });
+      saveCallback!.action({ chats: [updatedTitle] });
 
       expect(
         block.element()?.querySelector(chatTitleClassName)?.textContent,

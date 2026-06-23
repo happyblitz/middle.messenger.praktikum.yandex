@@ -5,9 +5,10 @@ let lastInstance: MockXMLHttpRequest;
 
 class MockXMLHttpRequest {
   status: number = 0;
-  responseText: string;
+  responseText: string = "";
   constructor() {
-    lastInstance = this;
+    // @ts-expect-error Для тестов нужна ссылка на экземпляр
+    lastInstance = this as unknown;
   }
   async open() {}
   async send() {}

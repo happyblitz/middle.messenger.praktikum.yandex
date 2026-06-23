@@ -4,7 +4,7 @@ import type { UploadFile } from "../core/Store";
 
 const BASE_RESOURES_URL = "https://ya-praktikum.tech/api/v2/resources";
 
-export function getDisplayName(user: User | {} = {}): string {
+export function getDisplayName(user: Partial<User> = {}): string {
   if ("id" in user) {
     return user?.display_name || `${user.first_name} ${user.second_name}`;
   }
@@ -12,7 +12,7 @@ export function getDisplayName(user: User | {} = {}): string {
   return "Некто";
 }
 
-export function getUserAvatar(user: User | {} = {}): string {
+export function getUserAvatar(user: Partial<User> = {}): string {
   if ("avatar" in user) {
     return BASE_RESOURES_URL + user.avatar;
   }
@@ -26,8 +26,8 @@ export function getChannelAvatar(chat: Chat): string {
     : "/images/channelAvatar.png";
 }
 
-export function getFileUrl(file: UploadFile | {} = {}): string {
-  if (file && "path" in file) {
+export function getFileUrl(file: Partial<UploadFile> = {}): string {
+  if ("path" in file) {
     return BASE_RESOURES_URL + file.path;
   } else {
     return "";

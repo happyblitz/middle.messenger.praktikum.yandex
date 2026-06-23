@@ -14,7 +14,7 @@ type Observer = (state: StoreState) => unknown;
  * @param observer - генерирует объект сравнения состояния (старые данные vs новые данные)
  * @param currentState - результат функции Observer(текущий стор), создается во время подписки
  */
-type Listener = {
+export type Listener = {
   action: (state: StoreState) => void;
   observer: Observer;
   currentState?: unknown;
