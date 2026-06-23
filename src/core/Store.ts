@@ -196,8 +196,6 @@ class Store {
         listener.action(this.state);
       }
     });
-
-    console.log("emit", this.state);
   }
 }
 
