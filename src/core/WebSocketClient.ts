@@ -2,24 +2,33 @@ import { WEBSOCKET_BASE_URL } from "../scripts/api.settings";
 
 type SocketCallback = (event: Event) => void;
 
+const eventNames = ["open", "close", "message", "error"] as const;
+
 type listeners = Partial<
-  Record<"open" | "message" | "close" | "error", Set<SocketCallback>>
+  Record<(typeof eventNames)[number], Set<SocketCallback>>
 >;
 
 class WebSocketClient {
   private socket: WebSocket | null = null;
   private listeners: listeners = {};
+  private nativeListeners: {
+    eventName: (typeof eventNames)[number];
+    handler: (e: Event) => void;
+  }[] = [];
 
   constructor(url: string) {
     this.connect(url);
 
-    ["open", "close", "message", "error"].forEach((eventName) => {
-      this.socket?.addEventListener(eventName as keyof listeners, (event) => {
-        const key = eventName as keyof listeners;
-        if (this.listeners[key]) {
-          this.listeners[key].forEach((listener) => listener(event));
+    eventNames.forEach((eventName) => {
+      const handler = (event: Event) => {
+        if (this.listeners[eventName]) {
+          this.listeners[eventName].forEach((listener) => listener(event));
         }
-      });
+      };
+
+      this.socket?.addEventListener(eventName, handler);
+
+      this.nativeListeners.push({ eventName, handler });
     });
   }
 
@@ -28,7 +37,21 @@ class WebSocketClient {
   }
 
   disconnect() {
-    this.socket?.close();
+    // 1. Сохраняем ссылку на сокет
+    const activeSocket = this.socket;
+
+    // 2. Сразу обнуляем, чтобы кастомные обработчики не вызывались
+    this.socket = null;
+    this.listeners = {};
+
+    // 3. Закрываем соединение (браузер вызовет нативные обработчики, но this.listeners уже пуст)
+    activeSocket?.close();
+
+    // 4. Удаляем нативные слушатели
+    this.nativeListeners.forEach((item) => {
+      activeSocket?.removeEventListener(item.eventName, item.handler);
+    });
+    this.nativeListeners = [];
   }
 
   send(message: string) {

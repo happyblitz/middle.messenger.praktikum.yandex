@@ -226,6 +226,7 @@ class ChannelWindow extends Block<ChannelWindowProps> {
     this.children.channelInfo.setProps({ chat: this.props.chat });
 
     const chatId = this.props.chat?.id;
+
     if (chatId) {
       // просим контролер запросить список пользователей чата
       this.chatController.getChatUsers(chatId);
@@ -233,20 +234,6 @@ class ChannelWindow extends Block<ChannelWindowProps> {
       // получаем список пользователей чата из стора
       const chatUsers = store.getState().chatUsers?.[chatId];
       this.usersLoaded(chatUsers);
-
-      // подгружаем сообщения
-      const container = this.getMessagesContainer();
-      if (container) {
-        this.scrollHandler = () => {
-          if (this.isScrollNearTop() && !this.isLoadingMore) {
-            this.isLoadingMore = true;
-            this.scrollHeight = container.scrollHeight;
-            this.socketController!.getMessages();
-          }
-        };
-
-        container.addEventListener("scroll", this.scrollHandler);
-      }
 
       // подписка на стор: новые сообщения
       this.unsubscribers.push(
@@ -273,9 +260,34 @@ class ChannelWindow extends Block<ChannelWindowProps> {
 
       // делаем операцию с await последней,
       // чтобы слушатели не пропустили расстылку стора
-      this.socketController = new ChatWebSocketController(chatId);
-      await this.socketController.init();
+      const socketController: ChatWebSocketController | null =
+        new ChatWebSocketController(chatId);
+
+      await socketController.init();
+
+      // пока подключались чат устарел
+      // например это триггерит почти два одновременных события стора при новом чате
+      if (this.props.chat?.id !== chatId) {
+        socketController.unmount();
+        return;
+      }
+
+      this.socketController = socketController;
       this.socketController.getMessages();
+
+      // подгружаем сообщения
+      const container = this.getMessagesContainer();
+      if (container) {
+        this.scrollHandler = () => {
+          if (this.isScrollNearTop() && !this.isLoadingMore) {
+            this.isLoadingMore = true;
+            this.scrollHeight = container.scrollHeight;
+            this.socketController!.getMessages();
+          }
+        };
+
+        container.addEventListener("scroll", this.scrollHandler);
+      }
 
       // подписка на стор: файл загружен на сервер
       this.unsubscribers.push(
@@ -306,6 +318,7 @@ class ChannelWindow extends Block<ChannelWindowProps> {
     this.messages = {};
     // close socket connection
     this.socketController?.unmount();
+    this.socketController = null;
 
     const container = this.getMessagesContainer();
     if (container && this.scrollHandler) {

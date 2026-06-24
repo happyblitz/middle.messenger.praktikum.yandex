@@ -4,9 +4,11 @@ import Avatar from "../../../components/avatar";
 import type { User } from "../../../core/Store";
 import hbs from "./template.hbs?raw";
 import AuthController from "../../../controllers/AuthController";
+import { getDisplayName, getUserAvatar } from "../../../utils/Globals";
 
 type ProfileInfoProps = {
   user: User;
+  displayName?: string;
   onEditProfile: () => void;
   onChangePasswrod: () => void;
 };
@@ -17,8 +19,8 @@ class ProfileInfo extends Block<ProfileInfoProps> {
   constructor(props: ProfileInfoProps) {
     super(props);
 
-    const avatarImg = new Avatar({
-      src: this.props.user.avatar as string,
+    const avatar = new Avatar({
+      src: getUserAvatar(this.props.user),
       className: ["profile__avatar"],
     });
 
@@ -47,8 +49,12 @@ class ProfileInfo extends Block<ProfileInfoProps> {
       editProfileButton,
       newPasswordButton,
       logoutButton,
-      avatarImg,
+      avatar,
     };
+  }
+
+  protected beforeCompile(): void {
+    this.props.displayName = getDisplayName(this.props.user);
   }
 }
 

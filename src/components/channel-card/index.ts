@@ -59,7 +59,7 @@ class ChannelCard extends Block<ChannelCardProps> {
             .filter((c) => c.id === this.props.chat.id)
             ?.at(-1);
           const isSameChat = isEqual(this.props.chat, chat);
-          if (!isSameChat) {
+          if (chat && !isSameChat) {
             this.setProps({ chat });
           }
         },

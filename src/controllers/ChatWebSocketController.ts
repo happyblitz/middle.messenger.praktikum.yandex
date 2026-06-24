@@ -10,6 +10,8 @@ class ChatWebSocketController {
   private token: string = "";
   private socketClient: WebSocketClient | null = null;
   private listeners: (() => void)[] = [];
+  private isDestroyed: boolean = false;
+  private isReconnecting: boolean = false;
 
   constructor(chatId: number) {
     this.chatId = chatId;
@@ -20,6 +22,10 @@ class ChatWebSocketController {
    * @returns
    */
   public async init() {
+    if (this.isDestroyed || this.isReconnecting) {
+      return;
+    }
+
     this.token = (await this.getToken()) as string;
 
     if (!this.token) {
@@ -48,10 +54,21 @@ class ChatWebSocketController {
    * Переподключение
    */
   protected reconnect() {
-    this.unsubscribe();
+    this.killSocket();
 
-    setTimeout(() => {
-      this.init();
+    if (this.isDestroyed || this.isReconnecting) {
+      return;
+    }
+
+    this.isReconnecting = true;
+
+    setTimeout(async () => {
+      if (this.isDestroyed) {
+        return;
+      }
+
+      this.isReconnecting = false;
+      await this.init();
     }, 1000); // Пауза перед переподключением
   }
 
@@ -59,8 +76,17 @@ class ChatWebSocketController {
    * Закрываем соединение
    */
   public unmount() {
+    this.isDestroyed = true;
+    this.killSocket();
+  }
+
+  /**
+   * Закрываем соединение
+   */
+  public killSocket() {
     this.unsubscribe();
     this.socketClient?.disconnect();
+    this.socketClient = null;
   }
 
   /**

@@ -9,9 +9,11 @@ import hbs from "./template.hbs?raw";
 import UserController from "../../../controllers/UserController";
 import store from "../../../core/Store";
 import { accept } from "../../../utils/validation/Validator";
+import { getUserAvatar, getDisplayName } from "../../../utils/Globals";
 
 type ProfileEditFieldsProps = {
   user: User;
+  displayName?: string;
 };
 
 class ProfileEditFields extends FormBlock<ProfileEditFieldsProps> {
@@ -21,8 +23,8 @@ class ProfileEditFields extends FormBlock<ProfileEditFieldsProps> {
   constructor(props: ProfileEditFieldsProps) {
     super(props);
 
-    const avatarImg = new Avatar({
-      src: this.props.user.avatar as string,
+    const avatar = new Avatar({
+      src: getUserAvatar(this.props.user),
       className: ["profile__avatar"],
     });
 
@@ -95,7 +97,7 @@ class ProfileEditFields extends FormBlock<ProfileEditFieldsProps> {
     });
 
     this.children = {
-      avatarImg,
+      avatar,
       avatarInput,
       emailInput,
       loginInput,
@@ -142,8 +144,16 @@ class ProfileEditFields extends FormBlock<ProfileEditFieldsProps> {
     };
   }
 
+  protected beforeCompile(): void {
+    this.props.displayName = getDisplayName(this.props.user);
+  }
+
   protected componentDidMount(): void {
     super.componentDidMount();
+
+    this.children.avatar.setProps({ src: getUserAvatar(this.props.user) });
+    this.children.saveButton.setProps({ disabled: false });
+
     this.controller = new UserController();
     this.formErrorListener({
       formKey: "avatar",
@@ -161,7 +171,6 @@ class ProfileEditFields extends FormBlock<ProfileEditFieldsProps> {
         action: (state) => {
           if (state.user) {
             this.setProps({ user: state.user });
-            this.children.saveButton.setProps({ disabled: false });
             this.formSuccessMessage(this.children.formInfo as InfoMessage);
           }
         },
