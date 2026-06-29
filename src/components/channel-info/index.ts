@@ -5,7 +5,7 @@ import hbs from "./template.hbs?raw";
 import "./styles.scss";
 import debounce from "../../utils/functions/debounce";
 import UserController from "../../controllers/UserController";
-import ChatsController from "../../controllers/ChatsController";
+import ChatController from "../../controllers/ChatController";
 import store from "../../core/Store";
 import UsersList from "./user-list";
 import UsersListSelected from "./user-list-selected";
@@ -25,7 +25,7 @@ type UsersListType = Record<string, User>;
 class ChannelInfo extends FormBlock<ChannelInfoProps> {
   template = hbs;
   userController: UserController | null = null;
-  chatsController: ChatsController | null = null;
+  chatController: ChatController | null = null;
   requestId: number = 0; // номер запроса, чтобы не отображать устаревшие данные
   users: UsersListType = {}; // найденные через поиск
   selectedUsers: UsersListType = {}; // выбранные через форму
@@ -114,7 +114,7 @@ class ChannelInfo extends FormBlock<ChannelInfoProps> {
         if (this.isFormEvent(event)) {
           event.preventDefault();
 
-          this.chatsController?.setChatUsers(
+          this.chatController?.setChatUsers(
             this.props.chat as Chat,
             Object.keys(this.selectedUsers).map((i) => Number(i)),
           );
@@ -127,14 +127,14 @@ class ChannelInfo extends FormBlock<ChannelInfoProps> {
   protected componentDidMount(): void {
     super.componentDidMount();
     this.userController = new UserController();
-    this.chatsController = new ChatsController();
+    this.chatController = new ChatController();
 
     // запрашиваем пользователей чата
     if (this.props.chat?.id) {
       const chatId = this.props.chat.id;
 
       // просим контролер запросить список пользователей чата
-      this.chatsController.getChatUsers(chatId);
+      this.chatController.getChatUsers(chatId);
 
       // получаем список пользователей чата из стора
       const chatUsers = store.getState().chatUsers?.[chatId];

@@ -7,7 +7,6 @@ import hbs from "./template.hbs?raw";
 import "./styles.scss";
 import store from "../../core/Store";
 import type { User } from "../../core/Store";
-import { getDisplayName, getUserAvatar } from "../../utils/Globals";
 import Router from "../../core/Router";
 
 export type ProfileProps = {
@@ -34,10 +33,6 @@ class ProfilePage extends Block<ProfileProps> {
     this.props.user = user ? { ...user } : null;
 
     if (this.props.user) {
-      const display_name = getDisplayName(this.props.user);
-      const avatar = getUserAvatar(this.props.user);
-      this.props.user = { ...this.props.user, display_name, avatar };
-
       const onDeepClose = () => Router.getInstance().goto("/settings");
 
       switch (this.props.page) {

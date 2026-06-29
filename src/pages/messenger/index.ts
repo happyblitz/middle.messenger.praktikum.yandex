@@ -50,7 +50,7 @@ class MessengerPage extends Block<MessengerProps> {
     });
 
     const channelWindow = new ChannelWindow({
-      onBack: this.showChannelsList.bind(this),
+      onBack: this.showChannelsList,
     });
 
     const newChannelModal = new NewChannel({
@@ -78,19 +78,9 @@ class MessengerPage extends Block<MessengerProps> {
     const elements: HTMLElement[] = [];
 
     this.props.chats.forEach((chat) => {
-      const date = chat?.last_message?.time
-        ? new Intl.DateTimeFormat("ru-RU").format(
-            new Date(chat?.last_message?.time),
-          )
-        : "";
-
       const channelCardProps = {
         chat,
-        formats: {
-          date,
-          last_message: chat?.last_message?.content.slice(0, 80) ?? "",
-        },
-        isActive: false,
+        isActive: this.props.activeChatCard === chat.id,
         onSelect: () => this.setActiveChat(chat),
       };
 
@@ -105,6 +95,8 @@ class MessengerPage extends Block<MessengerProps> {
         elements.push(li);
         this.channelCards[chat.id] = channelCard;
       }
+
+      this.setActiveChat();
     });
 
     container.append(...elements);
@@ -173,25 +165,36 @@ class MessengerPage extends Block<MessengerProps> {
    * @param chat
    * @returns
    */
-  protected setActiveChat(chat: Chat) {
-    // same chat
+  protected setActiveChat(chat: Chat | null = null) {
+    if (chat === null) {
+      if (this.props.activeChatCard) {
+        // если текущий чат был удален, пересоберм окно чата
+        const isChatWasDeleted = this.props.chats?.every(
+          ({ id }) => id !== this.props.activeChatCard,
+        );
+        if (isChatWasDeleted) {
+          this.props.activeChatCard = null;
+          this.children.channelWindow.setProps({
+            chat: null,
+          });
+        }
+      }
+
+      return;
+    }
+
+    // этот чат уже активный
     if (this.props.activeChatCard === chat.id) {
       return;
     }
 
     // снимаем выделение со старого чата
     if (this.props.activeChatCard) {
-      const oldCard = this.channelCards[this.props.activeChatCard];
-      if (oldCard) {
-        oldCard.element()?.classList.toggle("isActive");
-      }
+      this.toggleChannelCard(this.props.activeChatCard);
     }
 
     // выделяем активный чат
-    const newCard = this.channelCards[chat.id];
-    if (newCard) {
-      newCard.element()?.classList.toggle("isActive");
-    }
+    this.toggleChannelCard(chat.id);
 
     // запоминаем новый активный чат
     this.props.activeChatCard = chat.id;
@@ -205,6 +208,19 @@ class MessengerPage extends Block<MessengerProps> {
       chat,
       onBack: this.showChannelsList,
     });
+  }
+
+  /**
+   * сбрасывает активный чат
+   */
+  resetActiveChat() {
+    // перерисовываем окно чата
+    this.children.channelWindow.setProps({
+      chat: null,
+    });
+
+    // сбрасываем активный чат
+    this.props.activeChatCard = null;
   }
 }
 

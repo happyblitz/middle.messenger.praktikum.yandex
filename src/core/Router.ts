@@ -93,7 +93,8 @@ class Router {
       routeKey = newpath;
     } else {
       for (const key of Object.keys(this.routes)) {
-        if (path.startsWith(key)) {
+        // все пути начинаются с /, это всегда даст совпадение без проверки длины
+        if (key.length > 1 && path.startsWith(key)) {
           routeKey = key;
           break;
         }

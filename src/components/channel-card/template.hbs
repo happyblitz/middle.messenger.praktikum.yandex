@@ -10,7 +10,9 @@
         <div class="channel-card__date">{{formats.date}}</div>
       </div>
       <div class="channel-card__body">
-        <div class="channel-card__last-message">{{chat.last_message}}</div>
+        <div class="channel-card__last-message">
+          {{chat.last_message.content}}
+        </div>
         {{#if chat.unread_count}}
         <div class="channel-card__new-messages colored-border">
           <span class="channel-card__new-messages-count"

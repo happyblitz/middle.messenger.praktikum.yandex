@@ -1,10 +1,10 @@
 import Controller from "../core/Controller";
 import store from "../core/Store";
-import chatsApi from "../api/ChatsApi";
+import chatApi from "../api/ChatApi";
 import type { Chat } from "../core/Store";
 import { delay } from "../utils/Globals";
 
-class ChatsController extends Controller {
+class ChatController extends Controller {
   formId = "chatSettings";
 
   /**
@@ -12,7 +12,7 @@ class ChatsController extends Controller {
    * @returns
    */
   public async chats() {
-    const response = await chatsApi.chats();
+    const response = await chatApi.chats();
 
     if (response?.reason) {
       store.setState({
@@ -32,7 +32,7 @@ class ChatsController extends Controller {
    * @returns
    */
   public async newChat(title: string) {
-    const response = await chatsApi.createChat({
+    const response = await chatApi.createChat({
       title,
     });
 
@@ -62,7 +62,7 @@ class ChatsController extends Controller {
    * @returns
    */
   protected async chatUsersRequest(chatId: number) {
-    const response = await chatsApi.getUsers(chatId);
+    const response = await chatApi.getUsers(chatId);
 
     if (response?.reason) {
       store.setStateByPath(`errors.getChatUsers`, response.reason);
@@ -123,7 +123,7 @@ class ChatsController extends Controller {
       return true;
     }
 
-    const response = await chatsApi.addUsers({
+    const response = await chatApi.addUsers({
       users,
       chatId,
     });
@@ -147,7 +147,7 @@ class ChatsController extends Controller {
       return true;
     }
 
-    const response = await chatsApi.deleteUsers({
+    const response = await chatApi.deleteUsers({
       users,
       chatId,
     });
@@ -186,6 +186,26 @@ class ChatsController extends Controller {
 
     this.storeUpdateUsers(chatId);
   }
+
+  /**
+   * Удаляет чат
+   * @param chatId
+   */
+  public async chatDelete(chatId: number) {
+    const response = await chatApi.deleteChat(chatId);
+
+    if (response?.reason) {
+      store.setState({
+        errors: { deleteChat: response },
+      });
+      return;
+    }
+
+    // чистим стор
+    store.deleteState(`chatUsers.${chatId}]`);
+
+    this.chats();
+  }
 }
 
-export default ChatsController;
+export default ChatController;

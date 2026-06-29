@@ -1,6 +1,7 @@
 import isEqual from "../utils/functions/isEqual";
 import merge from "../utils/functions/merge";
 import set from "../utils/functions/set";
+import deleteDeep from "../utils/functions/deleteDeep";
 
 /**
  * результат сравнения Observer(текущий стор) vs Observer(новый стор)
@@ -13,7 +14,7 @@ type Observer = (state: StoreState) => unknown;
  * @param observer - генерирует объект сравнения состояния (старые данные vs новые данные)
  * @param currentState - результат функции Observer(текущий стор), создается во время подписки
  */
-type Listener = {
+export type Listener = {
   action: (state: StoreState) => void;
   observer: Observer;
   currentState?: unknown;
@@ -32,6 +33,7 @@ type FormErrors = {
 export type StoreState = {
   isAuthorized: boolean;
   chats: Chat[];
+  messages: Record<number, Message[]>;
   user: User | null;
   errors?: {
     form?: FormErrorState;
@@ -39,11 +41,15 @@ export type StoreState = {
     getChats?: unknown;
     getChatUsers?: unknown;
     logout?: unknown;
+    deleteChat?: unknown;
+    uploadFiles?: Record<string, unknown>;
+    webSocket?: Record<number, unknown>;
   };
   response?: {
     form?: {
       changePassword?: unknown;
     };
+    uploadFiles?: Record<string, UploadFile>;
   };
   data?: {
     userSearch?: {
@@ -55,7 +61,7 @@ export type StoreState = {
   chatUsers?: ChatUsers;
 };
 
-export type ChatUsers = Record<string, User[]>;
+export type ChatUsers = Record<number, User[]>;
 
 export type User = {
   id: number;
@@ -82,6 +88,27 @@ export type Chat = {
   };
 };
 
+export type Message = {
+  content: string;
+  type: string;
+  time: string;
+  user_id: number;
+  id: number;
+  file?: UploadFile;
+  is_read?: boolean;
+  chat_id: number;
+};
+
+export type UploadFile = {
+  id: number;
+  user_id: number;
+  path: string;
+  filename: string;
+  content_type: string;
+  content_size: number;
+  upload_date: string;
+};
+
 export type FormErrorState = Partial<
   Record<
     | "register"
@@ -95,7 +122,12 @@ export type FormErrorState = Partial<
 >;
 
 class Store {
-  private state: StoreState = { isAuthorized: false, chats: [], user: null };
+  private state: StoreState = {
+    isAuthorized: false,
+    chats: [],
+    user: null,
+    messages: {},
+  };
   private listeners: listeners = new Set();
 
   public getState() {
@@ -127,6 +159,17 @@ class Store {
    */
   public setStateByPath(path: string, value: unknown) {
     this.state = set(this.state, path, value) as StoreState;
+    // Уведомляем всех подписчиков об изменении
+    this.emit();
+  }
+
+  /**
+   * Удаляет элемент из стора
+   * @param path Путь к вложенному свойству
+   */
+  public deleteState(path: string) {
+    deleteDeep(this.state, path);
+
     // Уведомляем всех подписчиков об изменении
     this.emit();
   }

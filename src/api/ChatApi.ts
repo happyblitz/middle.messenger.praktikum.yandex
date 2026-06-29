@@ -1,6 +1,6 @@
 import Api from "./API";
 
-class ChatsApi extends Api {
+class ChatApi extends Api {
   constructor() {
     super("/chats");
   }
@@ -19,6 +19,14 @@ class ChatsApi extends Api {
    */
   createChat(data: Record<string, unknown>) {
     return this.post("", { data });
+  }
+
+  /**
+   * удаляет чат
+   * @returns
+   */
+  deleteChat(chatId: number) {
+    return this.delete("", { data: { chatId } });
   }
 
   /**
@@ -44,8 +52,16 @@ class ChatsApi extends Api {
   getUsers(id: number) {
     return this.get(`/${id}/users`);
   }
+
+  /**
+   * получить токен чата
+   * @param chatId
+   */
+  getToken(chatId: number) {
+    return this.post(`/token/${chatId}`);
+  }
 }
 
-const chatsApi = new ChatsApi();
+const chatApi = new ChatApi();
 
-export default chatsApi;
+export default chatApi;

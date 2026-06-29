@@ -8,9 +8,11 @@ import hbs from "./template.hbs?raw";
 import InfoMessage from "../../../components/info-message";
 import UserController from "../../../controllers/UserController";
 import store from "../../../core/Store";
+import { getUserAvatar, getDisplayName } from "../../../utils/Globals";
 
 type ProfileChangePasswordProps = {
   user: User;
+  displayName?: string;
 };
 
 class ProfileChangePassword extends FormBlock<ProfileChangePasswordProps> {
@@ -19,8 +21,8 @@ class ProfileChangePassword extends FormBlock<ProfileChangePasswordProps> {
   constructor(props: ProfileChangePasswordProps) {
     super(props);
 
-    const avatarImg = new Avatar({
-      src: this.props.user.avatar ?? "",
+    const avatar = new Avatar({
+      src: getUserAvatar(this.props.user),
       className: ["profile__avatar"],
     });
 
@@ -57,7 +59,7 @@ class ProfileChangePassword extends FormBlock<ProfileChangePasswordProps> {
     });
 
     this.children = {
-      avatarImg,
+      avatar,
       oldPassInput,
       passwordInput,
       confirmPasswordInput,
@@ -99,7 +101,13 @@ class ProfileChangePassword extends FormBlock<ProfileChangePasswordProps> {
     };
   }
 
+  protected beforeCompile(): void {
+    this.props.displayName = getDisplayName(this.props.user);
+  }
+
   protected componentDidMount(): void {
+    this.children.saveButton.setProps({ disabled: false });
+
     this.controller = new UserController();
 
     this.formErrorListener({
@@ -112,7 +120,6 @@ class ProfileChangePassword extends FormBlock<ProfileChangePasswordProps> {
       store.subscribe({
         action: (state) => {
           if (state.response?.form?.changePassword) {
-            this.children.saveButton.setProps({ disabled: false });
             this.formSuccessMessage(this.children.formInfo as InfoMessage);
             store.setStateByPath("response.form.changePassword", null);
           }

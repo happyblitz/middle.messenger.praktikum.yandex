@@ -1,9 +1,7 @@
 import Block from "../../core/Block";
-import { getFileName } from "../../utils/Globals";
-import ChannelAPI from "../../api/ChannelApi";
-import type { Message } from "../../api/static-data/messages_static";
 import Input from "../input-field";
 import Button from "../button";
+import Text from "../text";
 import TextArea from "../textarea";
 import ChannelMessage from "./channel-message";
 import ShowAttach from "./show-attach";
@@ -16,8 +14,11 @@ import type { Chat } from "../../core/Store";
 import ChannelInfo from "../channel-info";
 import store from "../../core/Store";
 import type { User } from "../../core/Store";
-import ChatsController from "../../controllers/ChatsController";
-import { getDisplayName, getUserAvatar } from "../../utils/Globals";
+import ChatController from "../../controllers/ChatController";
+import ResourceController from "../../controllers/ResourceController";
+import { getDisplayName } from "../../utils/Globals";
+import ChatWebSocketController from "../../controllers/ChatWebSocketController";
+import type { Message } from "../../core/Store";
 import "./styles.scss";
 
 type ChannelWindowProps = {
@@ -26,7 +27,6 @@ type ChannelWindowProps = {
   attachFieldName?: string;
   onBack: () => void;
   chatUsers?: User[];
-  subTitle?: string;
 };
 
 class ChannelWindow extends Block<ChannelWindowProps> {
@@ -36,11 +36,18 @@ class ChannelWindow extends Block<ChannelWindowProps> {
     "channel__footer-form-send",
     this.cssHideClassName,
   ];
-  chatsController: ChatsController | null = null;
+  chatController: ChatController | null = null;
+  resourceController: ResourceController | null = null;
+  socketController: ChatWebSocketController | null = null;
   user: User = store.getState().user as User;
+  messages: Record<number, Message> = {};
+  processFiles: Set<string> = new Set();
+  isLoadingMore: boolean = false;
+  scrollHandler: (() => void) | null = null;
+  scrollHeight: number = 0;
 
   constructor(props: ChannelWindowProps) {
-    super({ attachFieldName: "attach", attachIcon, ...props });
+    super({ attachFieldName: "resource", attachIcon, ...props });
 
     const backButton = new Button({
       text: backIcon,
@@ -57,16 +64,20 @@ class ChannelWindow extends Block<ChannelWindowProps> {
       },
     });
 
-    const deleteChatButton = new Button({
-      text: "Удалить чат",
-      onClick: () => {},
-    });
-
     const settingsButton = new Button({
       text: settingsIcon,
       className: ["channel__header-tools-settings"],
       ariaLabel: "настройки чата",
       title: "настройки чата",
+    });
+
+    const deleteChatButton = new Button({
+      text: "Удалить чат",
+      onClick: () => {
+        if (this.props?.chat?.id) {
+          this.chatController?.chatDelete(this.props.chat.id);
+        }
+      },
     });
 
     const submitButton = new Button({
@@ -91,6 +102,8 @@ class ChannelWindow extends Block<ChannelWindowProps> {
       placeholder: "Ваше сообщение",
     });
 
+    const subTitle = new Text({ text: "" });
+
     const showAttach = new ShowAttach({
       onClick: () => {
         // очищаем поле формы
@@ -111,6 +124,7 @@ class ChannelWindow extends Block<ChannelWindowProps> {
     this.children = {
       backButton,
       channelInfo,
+      subTitle,
       chatUsersButton,
       deleteChatButton,
       settingsButton,
@@ -166,12 +180,13 @@ class ChannelWindow extends Block<ChannelWindowProps> {
         event.preventDefault();
 
         const form = this.getForm();
-        const formdata = new FormData(form);
+        const formData = new FormData(form);
 
-        const input = (formdata.get("message") as string).trim();
-        const attach = (formdata.get("attach") as File).name;
+        const input = (formData.get("message") as string).trim();
+        const attach = formData.get(this.props.attachFieldName!) as File;
+        const isAttach = attach && attach.size > 0;
+        const hasData = (input || isAttach) && this.props.chat?.id;
 
-        const hasData = (input || attach) && this.props.chat?.id;
         if (!hasData) {
           return;
         }
@@ -186,27 +201,15 @@ class ChannelWindow extends Block<ChannelWindowProps> {
         // скрываем поле с файлом и кнопкой отмены
         this.children.showAttach.setProps({ filename: "" });
 
-        let message: Message;
+        // отправляем текстовое сообщение
+        this.socketController?.send(input);
 
-        try {
-          const msg = await ChannelAPI.newMessage(
-            this.props.chat?.id as number,
-            formdata,
-          );
-          message = msg.message;
-        } catch (error) {
-          message = {
-            message: error as string,
-            username: getDisplayName(this.user),
-            avatar: getUserAvatar(this.user),
-          };
+        // загружаем файл на сервер
+        if (isAttach) {
+          formData.delete("message");
+          this.resourceController?.newResource(formData);
+          this.processFiles.add(attach.name);
         }
-
-        const messageElement = this.getMessageElement(message) as HTMLElement;
-        const container = this.getRef("messages") as HTMLElement;
-        container.append(messageElement);
-
-        this.scrollEnd([messageElement]);
 
         this.children.submitButton.setProps({
           disabled: false,
@@ -215,33 +218,203 @@ class ChannelWindow extends Block<ChannelWindowProps> {
     };
   }
 
-  protected beforeCompile(): void {
-    this.chatsController = new ChatsController();
+  protected async componentDidMount() {
+    super.componentDidMount();
+
+    this.chatController = new ChatController();
+
+    this.children.channelInfo.setProps({ chat: this.props.chat });
+
     const chatId = this.props.chat?.id;
+
     if (chatId) {
       // просим контролер запросить список пользователей чата
-      this.chatsController.getChatUsers(chatId);
+      this.chatController.getChatUsers(chatId);
 
       // получаем список пользователей чата из стора
       const chatUsers = store.getState().chatUsers?.[chatId];
-      this.setSubTitle(chatUsers);
+      this.usersLoaded(chatUsers);
+
+      // подписка на стор: новые сообщения
+      this.unsubscribers.push(
+        store.subscribe({
+          action: () => {
+            this.renderMessages();
+          },
+          observer: (state) => state.messages?.[chatId],
+        }),
+      );
 
       // подписка на стор: пользователи чата
       this.unsubscribers.push(
         store.subscribe({
           action: (state) => {
             const chatUsers = state.chatUsers?.[chatId];
-            this.setSubTitle(chatUsers);
+            this.usersLoaded(chatUsers);
           },
           observer: (state) => state.chatUsers?.[chatId],
+        }),
+      );
+
+      this.resourceController = new ResourceController();
+
+      // делаем операцию с await последней,
+      // чтобы слушатели не пропустили расстылку стора
+      const socketController: ChatWebSocketController | null =
+        new ChatWebSocketController(chatId);
+
+      await socketController.init();
+
+      // пока подключались чат устарел
+      // например это триггерит почти два одновременных события стора при новом чате
+      if (this.props.chat?.id !== chatId) {
+        socketController.unmount();
+        return;
+      }
+
+      this.socketController = socketController;
+      this.socketController.getMessages();
+
+      // подгружаем сообщения
+      const container = this.getMessagesContainer();
+      if (container) {
+        this.scrollHandler = () => {
+          if (this.isScrollNearTop() && !this.isLoadingMore) {
+            this.isLoadingMore = true;
+            this.scrollHeight = container.scrollHeight;
+            this.socketController!.getMessages();
+          }
+        };
+
+        container.addEventListener("scroll", this.scrollHandler);
+      }
+
+      // подписка на стор: файл загружен на сервер
+      this.unsubscribers.push(
+        store.subscribe({
+          action: (state) => {
+            const uploadedFiles = state.response?.uploadFiles ?? {};
+            this.processFiles.forEach((f) => {
+              if (f in uploadedFiles) {
+                // отправляем сообщение
+                this.socketController!.send(
+                  uploadedFiles[f].id.toString(),
+                  "file",
+                );
+                // удаляем файл из памяти
+                this.fileWasProcessed(f);
+              }
+            });
+          },
+          observer: (state) => state.response?.uploadFiles,
         }),
       );
     }
   }
 
-  protected componentDidMount(): void {
-    super.componentDidMount();
-    this.children.channelInfo.setProps({ chat: this.props.chat });
+  protected componentWillUnmount(): void {
+    // clear messages
+    this.socketController?.clearMessages();
+    this.messages = {};
+    // close socket connection
+    this.socketController?.unmount();
+    this.socketController = null;
+
+    const container = this.getMessagesContainer();
+    if (container && this.scrollHandler) {
+      container.removeEventListener("scroll", this.scrollHandler);
+      this.scrollHandler = null;
+    }
+  }
+
+  /**
+   * рендер сообщений, выводим без компонента сразу на страницу как статику
+   * если потребуется их изменение, переделаю на компонент
+   * @returns
+   */
+  protected renderMessages() {
+    if (!this.props.chat?.id) {
+      return;
+    }
+
+    const messages = store.getState().messages?.[this.props.chat.id] ?? [];
+    if (messages.length === 0) {
+      return;
+    }
+
+    const container = this.getRef("messages") as HTMLElement;
+
+    const wasAtBottom = this.isScrollAtBottom();
+
+    const earliestMessageTime = Object.values(this.messages).reduce(
+      (acc, m) => {
+        if (acc) {
+          return acc > m.time ? m.time : acc;
+        }
+
+        return m.time;
+      },
+      "",
+    );
+
+    const elements: HTMLElement[] = [];
+    let messageElement;
+
+    const newMessages: HTMLElement[] = [];
+    const oldMessages: HTMLElement[] = [];
+
+    messages.forEach((m) => {
+      const isProcessed = m.id in this.messages;
+      if (!isProcessed) {
+        messageElement = this.getMessageElement(m) as HTMLElement;
+        // новые сообщения вперед, старые назад
+        if (m.time > earliestMessageTime) {
+          newMessages.push(messageElement);
+        } else {
+          oldMessages.push(messageElement);
+        }
+
+        elements.push(messageElement);
+        this.messages[m.id] = m;
+      }
+    });
+
+    newMessages.forEach((m) => container.append(m));
+
+    oldMessages.reverse().forEach((m) => {
+      container.prepend(m);
+    });
+
+    // компенсация скрола
+    if (this.isLoadingMore) {
+      const newScrollHeight = container.scrollHeight;
+      container.scrollTop = newScrollHeight - this.scrollHeight;
+      this.isLoadingMore = false;
+    }
+
+    // если ранее были внизу
+    // прокручиваем вниз до последнего сообщения
+    if (wasAtBottom) {
+      this.scrollEnd(elements);
+    }
+  }
+
+  /**
+   * Хук выполняемый после получения пользователей от стора
+   * @param chatUsers
+   */
+  protected usersLoaded(chatUsers: User[] = []) {
+    this.setSubTitle(chatUsers);
+
+    // если пользователь админ, разблокируем кнопку: удалить чат
+    let isAdmin = false;
+    for (const u of chatUsers) {
+      if (u.id === this.user.id) {
+        isAdmin = u.role === "admin";
+      }
+    }
+
+    this.children.deleteChatButton.setProps({ disabled: !isAdmin });
   }
 
   /**
@@ -249,8 +422,9 @@ class ChannelWindow extends Block<ChannelWindowProps> {
    * @param chatUsers
    */
   protected setSubTitle(chatUsers: User[] = []) {
-    const subTitle = chatUsers?.map((user) => getDisplayName(user)).join(", ");
-    this.setProps({ subTitle });
+    const subTitle =
+      chatUsers?.map((user) => getDisplayName(user)).join(", ") ?? "";
+    this.children.subTitle.setProps({ text: subTitle });
   }
 
   private getFormAttachElement() {
@@ -281,13 +455,56 @@ class ChannelWindow extends Block<ChannelWindowProps> {
   }
 
   private getMessageElement(message: Message) {
-    const ChannelMessageProps = {
-      ...message,
-      imageDesc: getFileName(message.image ?? ""),
-    };
-
-    const channelMessage = new ChannelMessage(ChannelMessageProps);
+    const channelMessage = new ChannelMessage({
+      chatId: this.props.chat!.id,
+      message,
+    });
     return channelMessage.element();
+  }
+
+  /**
+   * Возвращает ссылку на элемент @messages-container
+   * @returns
+   */
+  private getMessagesContainer() {
+    return this.getRef("messages-container") as HTMLElement;
+  }
+
+  /**
+   * Файл был обработан и нам больше не нужен
+   * @param fileName
+   */
+  private fileWasProcessed(fileName: string) {
+    this.processFiles.delete(fileName);
+    this.resourceController!.fileWasProcessed(fileName);
+  }
+
+  /**
+   * Проверяем, внизу ли скрол, с запасом @threshold
+   * @returns
+   */
+  private isScrollAtBottom(): boolean {
+    const container = this.getMessagesContainer();
+    if (!container) return false;
+
+    const threshold = 100; // пикселей запаса
+
+    return (
+      container.scrollTop + container.clientHeight >=
+      container.scrollHeight - threshold
+    );
+  }
+
+  /**
+   * Проверяем близок ли скрол к потолку
+   * @returns
+   */
+  private isScrollNearTop(): boolean {
+    const container = this.getMessagesContainer();
+    if (!container) return false;
+
+    const threshold = 100; // пикселей от верха
+    return container.scrollTop <= threshold;
   }
 
   // правильнее заранее знать размеры картинок
@@ -317,14 +534,21 @@ class ChannelWindow extends Block<ChannelWindowProps> {
       Promise.all(imagePromises),
       new Promise((resolve) => setTimeout(resolve, 300)),
     ]).then(() => {
-      const mainContainer = this.getRef("messages-container") as HTMLElement;
-      if (mainContainer) {
-        mainContainer.scrollTo({
-          top: mainContainer.scrollHeight,
-          behavior: "auto",
-        });
-      }
+      this.doScrollEnd();
     });
+  }
+
+  /**
+   * Делает прокрутку вниз экрана
+   */
+  doScrollEnd() {
+    const mainContainer = this.getMessagesContainer();
+    if (mainContainer) {
+      mainContainer.scrollTo({
+        top: mainContainer.scrollHeight,
+        behavior: "auto",
+      });
+    }
   }
 }
 
